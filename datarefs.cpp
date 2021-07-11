@@ -20,6 +20,7 @@ void LoadDataRefs()
     fdr_find(&Sim_ENG_gen_on, "sim/cockpit/electrical/generator_on");
     fdr_find(&Sim_Timestamp, "sim/time/total_running_time_sec");
     fdr_find(&Sim_Paused, "sim/time/paused");
+
 }
 
 void GetDataRefs()
@@ -46,7 +47,6 @@ void GetDataRefs()
 
 void MakeDataRefs()
 {
-    DCR_CREATE_I(NULL, &set_current_pos, true, "omi/iru/set_current_pos");
     
     for (int i = 0; i < NUM_IRU; i++)
     {

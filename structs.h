@@ -14,6 +14,10 @@ struct triple_mix_pos_t
     vect2_t polar_vel_vect;
 };
 
+struct waypoints
+{
+    geo_pos2_t wp[9];
+};
 
 struct IRU_t
 {
@@ -49,6 +53,7 @@ struct Sim_State_t
     triple_mix_pos_t Triple_Mix_Pos;
 };
 
+extern waypoints flight_plan;
 extern IRU_t IRU[NUM_IRU];
 extern triple_mix_pos_t Triple_Mix_Pos;
 extern Sim_State_t State_New;

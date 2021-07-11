@@ -16,6 +16,7 @@ static dr_t Sim_Hdg_True;
 static dr_t Sim_APU_gen_on;
 static dr_t Sim_ENG_gen_on;
 static dr_t Sim_Timestamp;
+static dr_t Sim_AP_HDG_T;
 
 //function loads required datarefs
 void LoadDataRefs();

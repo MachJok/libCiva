@@ -92,6 +92,21 @@ void set_velocity_vect(int i)
 
 }
 
+void true_heading_update(int i)
+{
+
+}
+
+void wind_vect_update(int i)
+{
+
+}
+
+void drift_angle_update(int i)
+{
+
+}
+
 void current_pos_update(int i)
 {   
     set_velocity_vect(i);

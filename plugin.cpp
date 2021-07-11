@@ -9,6 +9,10 @@
 #include "structs.h"
 #include "variables.h"
 
+#if IBM
+    #include <windows.h>
+#endif
+
 #define PLUGIN_VERSION 210711.0651
 
 bool first_floop = true;
