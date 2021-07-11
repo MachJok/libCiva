@@ -8,6 +8,8 @@
 #include <acfutils/geom.h>
 #include <acfutils/perf.h>
 
+
+//sets random drift vector using MT19937 and stores to IRU
 void set_drift_vector();
 
 void set_true_hdg_offset();

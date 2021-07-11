@@ -17,11 +17,11 @@ static dr_t Sim_APU_gen_on;
 static dr_t Sim_ENG_gen_on;
 static dr_t Sim_Timestamp;
 
-
+//function loads required datarefs
 void LoadDataRefs();
-
+//get function for datarefs
 void GetDataRefs();
-
+//makes xplane datarefs
 void MakeDataRefs();
 
 #endif
