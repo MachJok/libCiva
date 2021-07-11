@@ -1,0 +1,304 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/GeographicLib.h
+sources.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.cpp
+datarefs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
+XPLMUtilities.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/XPLMUtilities.h
+acfutils/dr.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/dr.h
+acfutils/dr_cmd_reg.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/dr_cmd_reg.h
+structs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
+variables.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
+acfutils/dr.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/dr.h
+sources.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+structs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/functions.h
+sources.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+structs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
+variables.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
+datarefs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
+GeographicLib.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/GeographicLib.h
+acfutils/geom.h
+-
+acfutils/perf.h
+-
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/plugin.cpp
+XPLMProcessing.h
+-
+XPLMUtilities.h
+-
+acfutils/dr_cmd_reg.h
+-
+acfutils/log.h
+-
+acfutils/core.h
+-
+sources.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+datarefs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
+functions.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/functions.h
+structs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
+variables.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+cmath
+-
+exception
+-
+acfutils/assert.h
+-
+acfutils/helpers.h
+-
+XPLMDefs.h
+-
+cstring
+-
+acfutils/log.h
+-
+XPLMProcessing.h
+-
+acfutils/core.h
+-
+random
+-
+acfutils/math.h
+-
+acfutils/geom.h
+-
+acfutils/geom.h
+-
+acfutils/perf.h
+-
+acfutils/dr.h
+-
+acfutils/dr_cmd_reg.h
+-
+GeographicLib/Geodesic.hpp
+-
+GeographicLib/Constants.hpp
+-
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
+acfutils/geom.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/geom.h
+variables.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
+
+/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
+sources.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+
+XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
+XPLMDefs.h
+XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+
+XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+windows.h
+-
+stdint.h
+-
+
+XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
+XPLMDefs.h
+XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+
+XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
+XPLMDefs.h
+XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+
+libacfutils/include/acfutils/assert.h
+assert.h
+-
+stdlib.h
+-
+log.h
+libacfutils/include/acfutils/log.h
+sysmacros.h
+libacfutils/include/acfutils/sysmacros.h
+
+libacfutils/include/acfutils/cmd.h
+stdarg.h
+-
+XPLMUtilities.h
+-
+sysmacros.h
+libacfutils/include/acfutils/sysmacros.h
+
+libacfutils/include/acfutils/core.h
+stdlib.h
+-
+libconfig.h
+libacfutils/include/acfutils/libconfig.h
+
+libacfutils/include/acfutils/dr.h
+stdlib.h
+-
+string.h
+-
+XPLMDataAccess.h
+-
+helpers.h
+libacfutils/include/acfutils/helpers.h
+log.h
+libacfutils/include/acfutils/log.h
+types.h
+libacfutils/include/acfutils/types.h
+
+libacfutils/include/acfutils/dr_cmd_reg.h
+stdarg.h
+-
+stdbool.h
+-
+cmd.h
+libacfutils/include/acfutils/cmd.h
+dr.h
+libacfutils/include/acfutils/dr.h
+
+libacfutils/include/acfutils/geom.h
+stdlib.h
+-
+math.h
+-
+sysmacros.h
+libacfutils/include/acfutils/sysmacros.h
+types.h
+libacfutils/include/acfutils/types.h
+
+libacfutils/include/acfutils/helpers.h
+ctype.h
+-
+stdarg.h
+-
+stdio.h
+-
+string.h
+-
+sys/types.h
+-
+math.h
+-
+sys/stat.h
+-
+dirent.h
+-
+unistd.h
+-
+windows.h
+-
+lacf_getline_impl.h
+libacfutils/include/acfutils/lacf_getline_impl.h
+parser_funcs.h
+libacfutils/include/acfutils/parser_funcs.h
+math_core.h
+libacfutils/include/acfutils/math_core.h
+sysmacros.h
+libacfutils/include/acfutils/sysmacros.h
+safe_alloc.h
+libacfutils/include/acfutils/safe_alloc.h
+types.h
+libacfutils/include/acfutils/types.h
+
+libacfutils/include/acfutils/lacf_getline_impl.h
+zlib.h
+-
+core.h
+libacfutils/include/acfutils/core.h
+safe_alloc.h
+libacfutils/include/acfutils/safe_alloc.h
+
+libacfutils/include/acfutils/libconfig.h
+
+libacfutils/include/acfutils/log.h
+stdarg.h
+-
+sysmacros.h
+libacfutils/include/acfutils/sysmacros.h
+
+libacfutils/include/acfutils/math.h
+assert.h
+libacfutils/include/acfutils/assert.h
+math_core.h
+libacfutils/include/acfutils/math_core.h
+geom.h
+libacfutils/include/acfutils/geom.h
+
+libacfutils/include/acfutils/math_core.h
+math.h
+-
+assert.h
+libacfutils/include/acfutils/assert.h
+core.h
+libacfutils/include/acfutils/core.h
+
+libacfutils/include/acfutils/parser_funcs.h
+ctype.h
+-
+string.h
+-
+core.h
+libacfutils/include/acfutils/core.h
+safe_alloc.h
+libacfutils/include/acfutils/safe_alloc.h
+
+libacfutils/include/acfutils/perf.h
+geom.h
+libacfutils/include/acfutils/geom.h
+
+libacfutils/include/acfutils/safe_alloc.h
+string.h
+-
+stdlib.h
+-
+assert.h
+libacfutils/include/acfutils/assert.h
+
+libacfutils/include/acfutils/sysmacros.h
+windows.h
+-
+types.h
+libacfutils/include/acfutils/types.h
+sal.h
+-
+
+libacfutils/include/acfutils/types.h
+stdint.h
+-
+stdlib.h
+-
+limits.h
+-
+core.h
+libacfutils/include/acfutils/core.h
+basetsd.h
+-
+

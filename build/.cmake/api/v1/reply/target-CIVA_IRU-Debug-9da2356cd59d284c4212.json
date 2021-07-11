@@ -1,0 +1,352 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/output/CIVA_IRU/lin_x64/CIVA_IRU.xpl"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_link_libraries",
+			"add_definitions",
+			"include_directories"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 43,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 117,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 86,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 10,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 80,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 49,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " --std=c++14 -g -fPIC  "
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 3,
+					"define" : "APL=0"
+				},
+				{
+					"define" : "CIVA_IRU_EXPORTS"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "DEBUG"
+				},
+				{
+					"backtrace" : 3,
+					"define" : "IBM=0"
+				},
+				{
+					"backtrace" : 3,
+					"define" : "LIN=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "XPLM200=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "XPLM210=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "XPLM300=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "XPLM301=1"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/CIVA_IRU"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/PUBLIC"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/XPLSDK303/CHeaders/XPLM"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/XPLSDK303/CHeaders/Widgets"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/XPLSDK303/CHeaders/Wrappers"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/libacfutils/include"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/home/crash/Desktop/Projects/Dev/CIVA IRU/libacfutils/lin64/include"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "/usr/local/include/GeographicLib"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				1,
+				3,
+				5,
+				7
+			]
+		}
+	],
+	"id" : "CIVA_IRU::@6890427a1f51a3e7e1df",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "-Wl,-rpath,/usr/local/lib",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libGLEWmx.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libacfutils.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libcairo.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libcharset.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libcrypto.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libcurl.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libfreetype.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libiconv.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/liblzma.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libogg.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libopus.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libopusfile.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libopusurl.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libpcre2-8.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libpixman-1.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libpng16.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libproj.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libshp.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libssl.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libxml2.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../libacfutils/lin64/lib/libz.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "/usr/local/lib/libGeographic.so.19.2.0",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "CIVA_IRU",
+	"nameOnDisk" : "CIVA_IRU.xpl",
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				0,
+				2,
+				4,
+				6,
+				8,
+				9
+			]
+		},
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				1,
+				3,
+				5,
+				7
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"path" : "GeographicLib.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "datarefs.cpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "datarefs.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "functions.cpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "functions.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "plugin.cpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "sources.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "structs.cpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "structs.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "variables.h",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "SHARED_LIBRARY"
+}

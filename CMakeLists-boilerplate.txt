@@ -1,0 +1,136 @@
+
+# Boilerplate cmake version check
+cmake_minimum_required(VERSION 3.0)
+
+# Define your project name here. You can build multiple projects from
+# a single cmake file, or you can created nested project hierarchies,
+# each in its own folder.
+project(my_test_project)
+
+# set(name value...) is just setting a variable, nothing more.
+# There's nothing magical about the 'SRC' and 'HDR' names, we're
+# just using them to keep things organized.
+set(SRC
+    foo.c
+    bar.cpp)
+set(HDR
+    foo.h
+    bar.hpp)
+
+# To recall a variable use ${VARNAME}
+set(ALL_SRC ${SRC} ${HDR})
+
+# You can also set build-environment variables from the command line like so:
+#	cmake -DFOO=BAR .
+# this can then be referenced in the cmake file as ${FOO}
+
+# This just gives you nice alphabetical build order, not necessary really
+list(SORT ALL_SRC)
+
+# This configures "my_test_project" as building a shared library, which is
+# what X-Plane needs (DLL on Windows, dylib on Mac, .so on Linux) and
+# associates all our source files with it. Notice that CMake doesn't mind
+# if you list all sources and headers together in one big blob. It
+# understands what is C and what is C++ (based on file extension and
+# automatically picks the correct compiler & linker invocations.
+add_library(my_test_project SHARED ${ALL_SRC})
+
+# Here we configure where the compilers will look for extra include files.
+# Again, feel free to use the ${VARNAME} expansions in these strings if you
+# need more environment-specific control over where stuff is (otherwise the
+# paths are relative to where cmake is invoked).
+include_directories(my_test_project PUBLIC
+    "SDK/CHeaders/XPLM"
+    "SDK/CHeaders/Widgets"
+    "SDK/CHeaders/Wrappers"
+    "mylib/include"
+    "${OTHERLIB}/include"
+    )
+
+# You can add language-specific options by manipulating CMAKE_C_FLAGS for
+# the C language and CMAKE_CXX_FLAGS for the C++ language. To add common
+# options for both, use add_compile_options("blah blah").
+# Since compiler options tend to be quite compiler specific, you should
+# probably enclose these in a conditional such as:
+#	if (MSVC)
+#		# MSVC: warning level 4 and all warnings as errors
+#		add_compile_options(/W4 /WX)
+#	else()
+#		# GCC/Clang: lots of warnings and all warnings as errors
+#		add_compile_options(-Wall -Wextra -pedantic -Werror)
+#	endif()
+
+# Compiler flag specification
+# Always recommend maximum warnings and warnings-to-errors on,
+# but of course, customize to your needs.
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wextra -Werror --std=c11 \
+    -Wno-unused-local-typedefs -Wno-missing-field-initializers")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14")
+
+# A nifty little canned method that automatically converts between
+# compiler define flags based on the target compiler:
+add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1)
+if(WIN32)
+	add_definitions(-DAPL=0 -DIBM=1 -DLIN=0)
+elseif(APPLE)
+	add_definitions(-DAPL=1 -DIBM=0 -DLIN=0)
+else()
+	add_definitions(-DAPL=0 -DIBM=0 -DLIN=1)
+endif()
+
+# Linking
+
+# This looks for a library named "foo" (foo.dll, foo.dylib, libfoo.so)
+# in the system's standard library search paths. If found, "MY_LIB_NAME"
+# will be defined how the linking commands to link that library into the
+# resulting binary.
+find_library(FOO_LIBRARY "foo")
+
+# You can also manually provide a search path
+find_library(BAR_LIBRARY "bar" "/search/for/it/here")
+
+# Alternatively, when using a static library, you can literally just use
+# the exact library file as a linker input:
+set(BAZ_STATIC_LIBRARY "baz/libbaz.a")
+
+# This associates the libraries we want linked into the project.
+# Careful: order matters in target_link_libraries. Dependencies must be
+# ordered as first symbol callers and then as symbol providers (e.g.
+# libpng depends on libz, so link order must be first libpng, then libz).
+target_link_libraries(my_test_project
+    ${FOO_LIBRARY}
+    ${BAR_LIBRARY}
+    ${BAZ_LIBRARY}
+    )
+
+# This avoids prepending or appending any `lib' or `-<version>' extensions
+# to our build product. We want to control the output filename exactly.
+set_target_properties(my_test_project PROPERTIES PREFIX "")
+set_target_properties(my_test_project PROPERTIES SUFFIX "")
+set_target_properties(my_test_project PROPERTIES OUTPUT_NAME
+    "my_test_project.xpl")
+
+# Where does our product go? Place it one level above our source directory
+# into a directory name win_x64, mac_x64 or lin_x64, depending on the
+# target host platform.
+if(WIN32)
+	set_target_properties(my_test_project PROPERTIES
+	    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../win_x64" )
+	set_target_properties(my_test_project PROPERTIES
+	    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../win_x64" )
+elseif(APPLE)
+	set_target_properties(my_test_project PROPERTIES
+	    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../mac_x64" )
+	set_target_properties(my_test_project PROPERTIES
+	    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../mac_x64" )
+else()
+	set_target_properties(my_test_project PROPERTIES
+	    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../lin_x64" )
+	set_target_properties(my_test_project PROPERTIES
+	    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../lin_x64" )
+endif()
+
+# Any extra last-minute linker flags:
+#set_target_properties(my_test_project PROPERTIES LINK_FLAGS
+#    "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic -nodefaultlibs \
+#    -undefined_warning -fPIC -fvisibility=hidden")
