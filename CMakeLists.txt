@@ -52,7 +52,8 @@ include_directories(CIVA_IRU PUBLIC
     "XPLSDK303/CHeaders/Wrappers"
     "libacfutils/include"
     "libacfutils/lin64/include"
-	"/usr/local/include/GeographicLib"
+#change the following line to the local path for GeographicLib on your system
+    "/usr/local/include/GeographicLib"
     )
 
 # You can add language-specific options by manipulating CMAKE_C_FLAGS for

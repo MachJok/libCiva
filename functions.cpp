@@ -14,7 +14,7 @@
 #include <cmath>
 #include <random>
 
-int set_current_pos = 1; //reset to 0 for release
+
 geo_pos3_t old_pos{0};
 geo_pos3_t pos3{0}; //pos_3 will be the triple mix position
 vect3_t ecef_pos_[NUM_IRU + 1] = {0};
@@ -106,7 +106,8 @@ void current_pos_update(int i)
 
     double old_lat = IRU[i].current_pos.lat;
     double old_lon = IRU[i].current_pos.lon;
-    geod.Geodesic::Direct(old_lat, old_lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
+    //in: lat1, lat2, crs, dist, out: new lat, new lon
+    geod.Direct(old_lat, old_lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
     
     if(!IRU[0].mix_switch || !IRU[1].mix_switch || !IRU[2].mix_switch)
     {
@@ -143,8 +144,8 @@ void triple_mix()
         double trash_val, az, dist;
         az = {};
         dist = {};
-        //             IN:lat1         lon1        lat2  lon2 out: dist, az12,  az21
-        geod.Inverse(old_pos.lat, old_pos.lon, pos3.lat, pos3.lon, dist, az, trash_val);
+// IN:lat1, lon1, lat2, lon2 out: dist, az12, az21
+geod.Inverse(old_pos.lat, old_pos.lon, pos3.lat, pos3.lon, dist, az, trash_val);
         Triple_Mix_Pos.polar_vel_vect.x = az;
         Triple_Mix_Pos.polar_vel_vect.y = dist;
         Triple_Mix_Pos.polar_vel_vect.x = normalize_hdg(Triple_Mix_Pos.polar_vel_vect.x);
