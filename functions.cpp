@@ -11,6 +11,7 @@
 #include "structs.h"
 #include "variables.h"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <random>
 
@@ -42,8 +43,8 @@ void set_drift_vector()
         std::uniform_real_distribution<double> uniform_dist(0, 360);
         IRU[i].pos_drift_vect.x = drift_mag * cos(uniform_dist(gen2));
         IRU[i].pos_drift_vect.y = drift_mag * sin(uniform_dist(gen2));
-        IRU[i].polar_pos_drift.x = normalize_hdg(RAD2DEG(atan2(IRU[i].pos_drift_vect.y, IRU[i].pos_drift_vect.x)));
-        IRU[i].polar_pos_drift.y = sqrt((IRU[i].pos_drift_vect.y * IRU[i].pos_drift_vect.y) + (IRU[i].pos_drift_vect.x * IRU[i].pos_drift_vect.x));
+        IRU[i].polar_pos_drift.x = uniform_dist(gen2);
+        IRU[i].polar_pos_drift.y = drift_mag;
 
         ASSERT(!isnan(IRU[i].pos_drift_vect.x));
         ASSERT(!isnan(IRU[i].pos_drift_vect.y));
@@ -71,7 +72,7 @@ void iru_init()
     
     for (int i = 0; i < NUM_IRU; ++i)
     {
-        IRU[i].batt_capacity_sec = 1800;
+        IRU[i].batt_capacity_sec = 900;
         IRU[i].current_pos.elev = 0;
         IRU[i].align_pos.elev = 0;
         
@@ -80,52 +81,95 @@ void iru_init()
     }
     logMsg("IRU INIT COMPLETE: ");
 }
-
+//computes the actual N and E velocities of the aircraft in the sim to compute IRU velocity vectors m/s
+//simulates accelerometer integration for velocity
 void set_velocity_vect(int i)
 {
     vect2_t sim_vel_vect;
-    sim_vel_vect.x = State_New.ground_speed * cos(DEG2RAD(State_New.track));
-    sim_vel_vect.y = State_New.ground_speed * sin(DEG2RAD(State_New.track));
-    
+    sim_vel_vect.x = State_New.ground_speed * cos(DEG2RAD(State_New.true_trk));
+    sim_vel_vect.y = State_New.ground_speed * sin(DEG2RAD(State_New.true_trk));
     IRU[i].velocity_vect = vect2_add(sim_vel_vect, IRU[i].pos_drift_vect);
-
-
+    IRU[i].polar_vel.x = normalize_hdg(RAD2DEG(atan2(IRU[i].velocity_vect.y, IRU[i].velocity_vect.x)));
+    IRU[i].polar_vel.y = sqrt((IRU[i].velocity_vect.y * IRU[i].velocity_vect.y) + (IRU[i].velocity_vect.x * IRU[i].velocity_vect.x));
 }
+
 
 void true_heading_update(int i)
 {
-
+    IRU[i].heading_true = State_New.hdg_true;
 }
 
 void wind_vect_update(int i)
 {
+    double w_spd, w_dir, tas, gs, hdg, trk;
+    tas = IRU[i].tas;
+    gs = IRU[i].polar_vel.y;
+    hdg = DEG2RAD(IRU[i].heading_true);
+    trk = DEG2RAD(IRU[i].polar_vel.x);
+
+    assert(!isnan(tas));
+    assert(!isnan(gs));
+    assert(!isnan(hdg));
+    assert(!isnan(trk));
+
+    if(tas > 115 ) 
+    {
+        w_spd = sqrt(pow(pow(tas-gs,2) + (4 * tas * gs * pow(sin(hdg - trk) / 2, 2)), 2));
+        w_dir = normalize_hdg(RAD2DEG(trk + atan2(tas*sin(hdg - trk),tas*cos(hdg - trk) - gs)));
+        assert(!isnan(w_dir));
+        assert(!isnan(w_spd));
+        vect2_t wind_vect = {w_dir, w_spd};
+        IRU[i].polar_wind_vect = wind_vect;
+    }
+    else
+    {
+        IRU[i].polar_wind_vect = {0};
+    }
 
 }
 
 void drift_angle_update(int i)
 {
-
+    assert(!isnan(IRU[i].heading_true));
+    assert(!isnan(IRU[i].polar_vel.x));
+    IRU[i].drift_angle = IRU[i].polar_vel.x - IRU[i].heading_true;
 }
 
 void current_pos_update(int i)
 {   
     set_velocity_vect(i);
+    true_heading_update(i);
+    drift_angle_update(i);
+    wind_vect_update(i);
     //compute distance travelled in 1 frame and direction
     //MAKE NEW FUNCTION since velocities are now MAG-N/MAG-E not DIR/MAG
     double dist = sqrt((IRU[i].velocity_vect.y * IRU[i].velocity_vect.y) + (IRU[i].velocity_vect.x * IRU[i].velocity_vect.x)) * State_New.frame_time;
     double az = normalize_hdg(RAD2DEG(atan2(IRU[i].velocity_vect.y, IRU[i].velocity_vect.x)));
 
     IRU[i].polar_vel.x = az;
-    IRU[i].heading_true = az;
-    IRU[i].polar_vel.y = dist;
+    IRU[i].polar_vel.y = dist / State_New.frame_time;
 
     double old_lat = IRU[i].current_pos.lat;
     double old_lon = IRU[i].current_pos.lon;
     //in: lat1, lat2, crs, dist, out: new lat, new lon
     geod.Direct(old_lat, old_lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
     
+    //Altitude and TAS input into IRU. ADC1 -> IRU1/3, ADC 2 -> IRU2
+    for(int i = 0; i < NUM_IRU; ++i)
+    {
+        if(i == 2)
+        {
+            IRU[i].current_pos.elev = FEET2MET(State_New.alt_ft_[0]);
+            IRU[i].tas = KT2MPS(State_New.tas_kt_[0]);
+        }
+        else
+        {
+            IRU[i].current_pos.elev = FEET2MET(State_New.alt_ft_[i]);
+            IRU[i].tas = KT2MPS(State_New.tas_kt_[i]);
+        }
+    }
+
     if(NUM_IRU > 2)
-    
     {    
         if(!IRU[0].mix_switch || !IRU[1].mix_switch || !IRU[2].mix_switch)
         {
@@ -181,12 +225,12 @@ void electrical_source()
         {
             if ((!State_New.apu_gen_on && !State_New.eng_gen_on[j]) && IRU[i].nav_mode > 0) 
             {
-                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, 1800, 1);
+                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, 900, 1);
                 IRU[i].power_on = 0;
             }
-            else if(IRU[i].batt_capacity_sec <= 1800 && (State_New.apu_gen_on || State_New.eng_gen_on[j]))
+            else if(IRU[i].batt_capacity_sec <= 900 && (State_New.apu_gen_on || State_New.eng_gen_on[j]))
             {
-                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 1800, State_New.frame_time, .5);
+                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 900, State_New.frame_time, .5);
                 IRU[i].power_on = 1;
             }
         }

@@ -6,7 +6,6 @@
 
 //sim state variables
 
-
 struct triple_mix_pos_t
 {
     geo_pos3_t curr_pos;
@@ -17,13 +16,16 @@ struct triple_mix_pos_t
 struct waypoints
 {
     geo_pos2_t wp[9];
+    double dist[8];
+    double crs[8];
 };
 
 struct IRU_t
 {
-    double nav_mode; //nav mode on
-    double power_on; //is the unit on
-    double mix_switch; //triple mix
+    int nav_mode; //nav mode on
+    int power_on; //is the unit on
+    int mix_switch; //triple mix
+    int batt_self_test; //battery self test light during alignment
     geo_pos3_t current_pos; //computed from align pos and fwd propogation
     geo_pos3_t align_pos; //input for alignment - no cheating, bad pos = bad nav
     //triple_mix_pos_t triple_mix_pos_wgs;
@@ -32,18 +34,25 @@ struct IRU_t
     vect2_t correction_vect; //for DME updating (direction, magnitude)
     vect2_t velocity_vect; // current rectangular velocity vector (N, E)
     vect2_t polar_vel; //dir,mag
+    vect2_t polar_wind_vect;
     double heading_true; //true heading degrees
     double batt_capacity_sec; //1800 seconds of power
-    double batt_self_test; //battery self test light during alignment
+    double drift_angle;
+    double cross_track_err;
+    double track_ang_err;
+    double tas;
 };
 
 struct Sim_State_t
 {
     int paused;
     double runtime;
-    double frame_time;
-    double track;
+    double tas_kt_[2];
+    double alt_ft_[2];
+    double tas_ms;
     double ground_speed;
+    double true_trk;
+    double frame_time;
     double lat;
     double lon;
     double hdg_true;

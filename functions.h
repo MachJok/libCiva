@@ -21,6 +21,15 @@ void iru_init();
 //computes the velocity vector of the aicraft in sim and adds drift vector
 void set_velocity_vect(int i);
 
+//sets the platform true heading
+void true_heading_update(int i);
+
+//computes the wind vector for the INS, subject to loss of ADC tas input
+void wind_vect_update(int i);
+
+//computes drift angle DA
+void drift_angle_update(int i);
+
 //calls set_velocity_vect to compute new position and checks for triple mix flags
 void current_pos_update(int i);
 
