@@ -33,7 +33,9 @@ struct IRU_t
     vect2_t polar_pos_drift;//unit sensor bias polar coordinates
     vect2_t correction_vect; //for DME updating (direction, magnitude)
     vect2_t velocity_vect; // current rectangular velocity vector (N, E)
-    vect2_t polar_vel; //dir,mag
+    vect2_t flight_vect;
+    vect2_t polar_ground_vel; //dir,mag
+    vect2_t polar_flight_vel;
     vect2_t polar_wind_vect;
     double heading_true; //true heading degrees
     double batt_capacity_sec; //1800 seconds of power

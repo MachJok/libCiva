@@ -90,7 +90,9 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
         {
             if(IRU[i].nav_mode > 2)
             {
+                
                 current_pos_update(i);
+
             }
         }
 

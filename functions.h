@@ -27,9 +27,6 @@ void true_heading_update(int i);
 //computes the wind vector for the INS, subject to loss of ADC tas input
 void wind_vect_update(int i);
 
-//computes drift angle DA
-void drift_angle_update(int i);
-
 //calls set_velocity_vect to compute new position and checks for triple mix flags
 void current_pos_update(int i);
 

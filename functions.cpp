@@ -14,43 +14,53 @@
 #include <cassert>
 #include <cmath>
 #include <random>
+#include <type_traits>
 
 
 geo_pos3_t old_pos{0};
 geo_pos3_t pos3{0}; //pos_3 will be the triple mix position
 vect3_t ecef_pos_[NUM_IRU + 1] = {0};
 triple_mix_pos_t Triple_Mix_Pos = {0};
+bool drift = true;
 
 void set_drift_vector()
 {
-    vect2_t drift_vector;
-    double drift_mag{};
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    for(int i = 0; i<NUM_IRU; ++i)
-    {
-        bool try_again = true;
-        while (try_again)
+    if(drift)
+    {   
+        vect2_t drift_vector;
+        double drift_mag{};
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        for(int i = 0; i<NUM_IRU; ++i)
         {
-            std::normal_distribution<double> normal_dist(1.35, 0.41994);
-            drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
-            if(drift_mag > 0)
+            bool try_again = true;
+            while (try_again)
             {
-                try_again = false;
+                std::normal_distribution<double> normal_dist(1.35, 0.41994);
+                drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
+                if(drift_mag > 0)
+                {
+                    try_again = false;
+                }
             }
+            std::mt19937 gen2(rd());
+            std::uniform_real_distribution<double> uniform_dist(0, 360);
+            double drift_dir = uniform_dist(gen2);
+            IRU[i].pos_drift_vect = vect2_scmul(hdg2dir(drift_dir), drift_mag);
+            IRU[i].polar_pos_drift = {drift_dir, drift_mag};
+
+            ASSERT(!isnan(IRU[i].pos_drift_vect.x));
+            ASSERT(!isnan(IRU[i].pos_drift_vect.y));
         }
-        std::mt19937 gen2(rd());
-        std::uniform_real_distribution<double> uniform_dist(0, 360);
-        IRU[i].pos_drift_vect.x = drift_mag * cos(uniform_dist(gen2));
-        IRU[i].pos_drift_vect.y = drift_mag * sin(uniform_dist(gen2));
-        IRU[i].polar_pos_drift.x = uniform_dist(gen2);
-        IRU[i].polar_pos_drift.y = drift_mag;
-
-        ASSERT(!isnan(IRU[i].pos_drift_vect.x));
-        ASSERT(!isnan(IRU[i].pos_drift_vect.y));
     }
-
-
+    if(!drift)
+    {
+        for(int i = 0; i < NUM_IRU; ++i)
+        {
+            IRU[i].pos_drift_vect = {0};
+            IRU[i].polar_pos_drift = {0};
+        }
+    }
 }
 
 void set_true_hdg_offset()
@@ -66,7 +76,7 @@ void set_true_hdg_offset()
 
 void iru_init()
 {
-
+    drift = true;
     set_drift_vector();
     //set_true_hdg_offset();
     
@@ -86,11 +96,20 @@ void iru_init()
 void set_velocity_vect(int i)
 {
     vect2_t sim_vel_vect;
-    sim_vel_vect.x = State_New.ground_speed * cos(DEG2RAD(State_New.true_trk));
-    sim_vel_vect.y = State_New.ground_speed * sin(DEG2RAD(State_New.true_trk));
+    sim_vel_vect = vect2_scmul(hdg2dir(State_New.true_trk), State_New.ground_speed);
     IRU[i].velocity_vect = vect2_add(sim_vel_vect, IRU[i].pos_drift_vect);
-    IRU[i].polar_vel.x = normalize_hdg(RAD2DEG(atan2(IRU[i].velocity_vect.y, IRU[i].velocity_vect.x)));
-    IRU[i].polar_vel.y = sqrt((IRU[i].velocity_vect.y * IRU[i].velocity_vect.y) + (IRU[i].velocity_vect.x * IRU[i].velocity_vect.x));
+
+    // IRU[i].polar_ground_vel.x = normalize_hdg(dir2hdg(IRU[i].velocity_vect));
+    // IRU[i].polar_ground_vel.y = vect2_abs(IRU[i].velocity_vect) / State_New.frame_time;
+    // IRU[i].polar_flight_vel = {IRU[i].heading_true, IRU[i].tas};
+    double hdg = IRU[i].heading_true;
+    double tas = IRU[i].tas;
+    IRU[i].flight_vect = vect2_scmul(hdg2dir(hdg), tas);
+    IRU[i].polar_flight_vel.x = dir2hdg(IRU[i].flight_vect);
+    IRU[i].polar_flight_vel.y = vect2_abs(IRU[i].flight_vect);
+    IRU[i].polar_ground_vel.x = dir2hdg(IRU[i].velocity_vect);
+    IRU[i].polar_ground_vel.y = vect2_abs(IRU[i].velocity_vect);
+
 }
 
 
@@ -101,26 +120,22 @@ void true_heading_update(int i)
 
 void wind_vect_update(int i)
 {
-    double w_spd, w_dir, tas, gs, hdg, trk;
-    tas = IRU[i].tas;
-    gs = IRU[i].polar_vel.y;
-    hdg = DEG2RAD(IRU[i].heading_true);
-    trk = DEG2RAD(IRU[i].polar_vel.x);
+    
+   double min_spd = KT2MPS(115);
 
-    assert(!isnan(tas));
-    assert(!isnan(gs));
-    assert(!isnan(hdg));
-    assert(!isnan(trk));
 
-    if(tas > 115 ) 
+
+    if(IRU[i].tas > min_spd )
     {
-        w_spd = sqrt(pow(pow(tas-gs,2) + (4 * tas * gs * pow(sin(hdg - trk) / 2, 2)), 2));
-        w_dir = normalize_hdg(RAD2DEG(trk + atan2(tas*sin(hdg - trk),tas*cos(hdg - trk) - gs)));
-        assert(!isnan(w_dir));
-        assert(!isnan(w_spd));
-        vect2_t wind_vect = {w_dir, w_spd};
-        IRU[i].polar_wind_vect = wind_vect;
+        //gnd vector - flight vector
+        vect2_t wind_vector = vect2_sub(IRU[i].flight_vect, IRU[i].velocity_vect);
+        IRU[i].polar_wind_vect = {floor(normalize_hdg(dir2hdg(wind_vector))), round(MPS2KT(vect2_abs(wind_vector)))};
+        //{normalize_hdg(dir2hdg(wind_vector)) + 180, vect2_abs(wind_vector)};
+        // IRU[i].polar_wind_vect.x = (normalize_hdg(dir2hdg(wind_vector)));
+        // IRU[i].polar_wind_vect.y = (vect2_abs(wind_vector));
+        FILTER_IN_LIN(IRU[i].drift_angle, IRU[i].polar_flight_vel.x - IRU[i].polar_ground_vel.x, State_New.frame_time, 30);
     }
+
     else
     {
         IRU[i].polar_wind_vect = {0};
@@ -128,27 +143,17 @@ void wind_vect_update(int i)
 
 }
 
-void drift_angle_update(int i)
-{
-    assert(!isnan(IRU[i].heading_true));
-    assert(!isnan(IRU[i].polar_vel.x));
-    IRU[i].drift_angle = IRU[i].polar_vel.x - IRU[i].heading_true;
-}
 
 void current_pos_update(int i)
 {   
     set_velocity_vect(i);
     true_heading_update(i);
-    drift_angle_update(i);
     wind_vect_update(i);
     //compute distance travelled in 1 frame and direction
     //MAKE NEW FUNCTION since velocities are now MAG-N/MAG-E not DIR/MAG
-    double dist = sqrt((IRU[i].velocity_vect.y * IRU[i].velocity_vect.y) + (IRU[i].velocity_vect.x * IRU[i].velocity_vect.x)) * State_New.frame_time;
-    double az = normalize_hdg(RAD2DEG(atan2(IRU[i].velocity_vect.y, IRU[i].velocity_vect.x)));
 
-    IRU[i].polar_vel.x = az;
-    IRU[i].polar_vel.y = dist / State_New.frame_time;
-
+    double az = IRU[i].polar_ground_vel.x;
+    double dist = vect2_abs(IRU[i].velocity_vect) * State_New.frame_time;
     double old_lat = IRU[i].current_pos.lat;
     double old_lon = IRU[i].current_pos.lon;
     //in: lat1, lat2, crs, dist, out: new lat, new lon
@@ -210,10 +215,10 @@ void triple_mix()
         // IN:lat1, lon1, lat2, lon2 out: dist, az12, az21
         geod.Inverse(old_pos.lat, old_pos.lon, pos3.lat, pos3.lon, dist, az, trash_val);
         Triple_Mix_Pos.polar_vel_vect.x = az;
-        Triple_Mix_Pos.polar_vel_vect.y = dist;
+        Triple_Mix_Pos.polar_vel_vect.y = dist / State_New.frame_time;
         Triple_Mix_Pos.polar_vel_vect.x = normalize_hdg(Triple_Mix_Pos.polar_vel_vect.x);
-        Triple_Mix_Pos.velocity_vect.x = dist * cos(az);
-        Triple_Mix_Pos.velocity_vect.y = dist * sin(az);
+        Triple_Mix_Pos.velocity_vect.x = dist * sin(DEG2RAD(az)) / State_New.frame_time;
+        Triple_Mix_Pos.velocity_vect.y = dist * cos(DEG2RAD(az)) / State_New.frame_time;
     }    
 }
 

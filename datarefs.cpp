@@ -13,7 +13,7 @@ void LoadDataRefs()
     fdr_find(&Sim_Paused, "sim/time/paused");
     fdr_find(&Sim_Lat, "sim/flightmodel/position/latitude");
     fdr_find(&Sim_Lon, "sim/flightmodel/position/longitude");
-    fdr_find(&Sim_Hdg_True, "sim/flightmodel/position/hpath");
+    fdr_find(&Sim_Hdg_True, "sim/flightmodel/position/true_psi");
     fdr_find(&Sim_APU_gen_on, "sim/cockpit/electrical/generator_apu_on");
     fdr_find(&Sim_ENG_gen_on, "sim/cockpit/electrical/generator_on");
     fdr_find(&Sim_Timestamp, "sim/time/total_running_time_sec");
@@ -24,7 +24,7 @@ void LoadDataRefs()
     fdr_find(&Sim_ALT_R,"sim/cockpit2/gauges/indicators/airspeed_kts_copilot");
     fdr_find(&Sim_Ground_Speed, "sim/flightmodel/position/groundspeed");
     fdr_find(&Sim_TAS,"sim/flightmodel/position/true_airspeed");
-    fdr_find(&Sim_True_Track, "sim/flightmodel/position/true_psi");   
+    fdr_find(&Sim_True_Track, "sim/flightmodel/position/hpath");   
 
 }
 
@@ -75,8 +75,10 @@ void MakeDataRefs()
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].align_pos, 2, true, "omi/iru/%d/align_pos", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].pos_drift_vect, 2, true, "omi/iru/%d/pos_drift_ne",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_pos_drift, 2, true, "omi/iru/%d/pos_drift_vect",i);
-        DCR_CREATE_VF64(NULL, (double *) &IRU[i].velocity_vect, 2, true, "omi/iru/%d/vel_ne", i);
-        DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_vel, 2, true, "omi/iru/%d/vel_vect", i);
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].velocity_vect, 2, true, "omi/iru/%d/gnd_vel_ne", i);
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].flight_vect, 2, true, "omi/iru/%d/flt_vel_ne", i);        
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_ground_vel, 2, true, "omi/iru/%d/ground_vel_vect", i);
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_flight_vel, 2, true, "omi/iru/%d/flight_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_wind_vect, 2, true, "omi/iru/%d/wind_vect",i);
         DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.curr_pos, 2, true, "omi/iru/%d/triple_mix_pos",i);
         DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.velocity_vect, 2, true, "omi/iru/%d/triple_mix_vel_ne",i);
