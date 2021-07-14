@@ -3,6 +3,7 @@
 #include <acfutils/dr_cmd_reg.h>
 #include <acfutils/log.h>
 #include <acfutils/core.h>
+#include <cstring>
 #include "sources.h"
 #include "datarefs.h"
 #include "functions.h"
@@ -19,6 +20,7 @@ bool timer_start = {};
 bool old_timer = {true};
 bool first_floop = {true};
 double nav_start_time = {};
+char sim_pos_dm[32] = {0};
 
 
 static float 
@@ -85,7 +87,10 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
     GetDataRefs();
     if(!State_New.paused)
     {
-        sim_pos_deg_min();
+        //sim_pos_deg_min();
+        deg_min(State_New.lat, State_New.lon, *output);
+        strcpy(sim_pos_dm, output);
+
         electrical_source();
         debug_set_pos();
         

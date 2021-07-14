@@ -43,6 +43,8 @@ void triple_mix();
 void debug_set_pos();
 
 //converts sim position to deg minute format
-void sim_pos_deg_min();
+// void sim_pos_deg_min();
+
+void deg_min(double lat, double lon, char& output);
 
 #endif

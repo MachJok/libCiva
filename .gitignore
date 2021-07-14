@@ -1,2 +1,6 @@
-/XPLSDK303
-/libacfutils
+XPLSDK303/
+libacfutils/
+CMakeFiles/
+build/
+cmake_install.cmake
+CMakeLists.txt

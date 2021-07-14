@@ -58,11 +58,11 @@ void GetDataRefs()
 
 void MakeDataRefs()
 {
-    
+    DCR_CREATE_B(NULL, sim_pos_dm, sizeof(sim_pos_dm), true, "omi/iru/sim_pos_dm");
     for (int i = 0; i < NUM_IRU; i++)
     {
         
-        DCR_CREATE_B(NULL, sim_pos_dm, sizeof(sim_pos_dm), true, "omi/iru/sim_pos_dm");
+        
         DCR_CREATE_I(NULL, &IRU[i].nav_mode, true, "omi/iru/%d/mode", i);
         DCR_CREATE_I(NULL, &IRU[i].power_on, true, "omi/iru/%d/power", i);
         DCR_CREATE_I(NULL, &IRU[i].mix_switch, true, "omi/iru/%d/triple_mix_switch", i);

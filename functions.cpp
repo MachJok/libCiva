@@ -5,6 +5,7 @@
 #include "acfutils/helpers.h"
 #include "acfutils/log.h"
 #include "acfutils/math.h"
+#include "acfutils/math_core.h"
 #include "acfutils/perf.h"
 #include "acfutils/sysmacros.h"
 #include "datarefs.h"
@@ -16,6 +17,7 @@
 #include <cstdio>
 #include <cstring>
 #include <random>
+#include <sys/types.h>
 #include <type_traits>
 
 
@@ -23,8 +25,10 @@ geo_pos3_t old_pos{0};
 geo_pos3_t pos3{0}; //pos_3 will be the triple mix position
 vect3_t ecef_pos_[NUM_IRU + 1] = {0};
 triple_mix_pos_t Triple_Mix_Pos = {0};
-char sim_pos_dm[32] = {0};
+
+
 bool drift = true;
+char output[32] = {0};
 
 void set_drift_vector()
 {
@@ -115,17 +119,37 @@ void set_velocity_vect(int i)
 
 }
 
-void sim_pos_deg_min()
+void deg_min(double lat, double lon, char &output)
 {
-    int lat_degrees = abs((int)(State_New.lat));
-    double lat_minutes = (State_New.lat - floor(State_New.lat))*60;
-    int lon_degrees = abs((int)(State_New.lon));
-    double lon_minutes = (State_New.lon - floor(State_New.lon))*60;
-    
-    char NS = (State_New.lat >= 0 ? 'N' : 'S');
-    char EW = (State_New.lon >= 0 ? 'E' : 'W');
-    snprintf(sim_pos_dm, sizeof(sim_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+    int lat_degrees = abs(lat);
+    double lat_minutes = (abs(lat) - floor(abs(lat)))*60;
+    int lon_degrees = abs(lon);
+    double lon_minutes = (abs(lon) - floor(abs(lon)))*60;;
+    char buffer[32]={0};
+    while (lat_minutes > 60)
+    {
+        lat_minutes = clamp(lon_minutes, 0, 59.9);
+    }
+    while (lon_minutes > 60)
+    {
+        lon_minutes = clamp(lon_minutes, 0, 59.9);
+    }
+    char NS = (lat >= 0 ? 'N' : 'S');
+    char EW = (lon >= 0 ? 'E' : 'W');
+    output = snprintf(buffer, sizeof(buffer), "%c%02d* %02.1f', %c%03d* %02.1f'", NS, lat_degrees,  lat_minutes, EW, lon_degrees, lon_minutes);  
 }
+
+// void sim_pos_deg_min()
+// {
+//     int lat_degrees = abs((int)(State_New.lat));
+//     double lat_minutes = (State_New.lat - floor(State_New.lat))*60;
+//     int lon_degrees = abs((int)(State_New.lon));
+//     double lon_minutes = (State_New.lon - floor(State_New.lon))*60;
+    
+//     char NS = (State_New.lat >= 0 ? 'N' : 'S');
+//     char EW = (State_New.lon >= 0 ? 'E' : 'W');
+//     snprintf(sim_pos_dm, sizeof(sim_pos_dm), "%c%02d* %02.1f', %c%03d* %02.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+// }
 
 
 
@@ -176,15 +200,16 @@ void current_pos_update(int i)
     double old_lon = IRU[i].current_pos.lon;
     //in: lat1, lat2, crs, dist, out: new lat, new lon
     geod.Direct(old_lat, old_lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
-    int lat_degrees = abs((int)(IRU[i].current_pos.lat));
-    double lat_minutes = (IRU[i].current_pos.lat - floor(IRU[i].current_pos.lat))*60;
-    int lon_degrees = abs((int)(IRU[i].current_pos.lon));
-    double lon_minutes = (IRU[i].current_pos.lon - floor(IRU[i].current_pos.lon))*60;
+    // int lat_degrees = abs((int)(IRU[i].current_pos.lat));
+    // double lat_minutes = (IRU[i].current_pos.lat - floor(IRU[i].current_pos.lat))*60;
+    // int lon_degrees = abs((int)(IRU[i].current_pos.lon));
+    // double lon_minutes = (IRU[i].current_pos.lon - floor(IRU[i].current_pos.lon))*60;
     
-    char NS = (IRU[i].current_pos.lat >= 0 ? 'N' : 'S');
-    char EW = (IRU[i].current_pos.lon >= 0 ? 'E' : 'W');
-    snprintf(IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
-
+    // char NS = (IRU[i].current_pos.lat >= 0 ? 'N' : 'S');
+    // char EW = (IRU[i].current_pos.lon >= 0 ? 'E' : 'W');
+    // snprintf(IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+    deg_min(IRU[i].current_pos.lat, IRU[i].current_pos.lon, *output);
+    strcpy(IRU[i].curr_pos_dm, output);
 
     
     //Altitude and TAS input into IRU. ADC1 -> IRU1/3, ADC 2 -> IRU2
@@ -234,15 +259,16 @@ void triple_mix()
     ecef_pos_[3].z = (ecef_pos_[0].z + ecef_pos_[1].z + ecef_pos_[2].z) / 3.;
     pos3 = ecef2geo(ecef_pos_[3], &wgs84);
 
-    int lat_degrees = abs((int)(pos3.lat));
-    double lat_minutes = (pos3.lat - floor(pos3.lat))*60;
-    int lon_degrees = abs((int)(pos3.lon));
-    double lon_minutes = (pos3.lon - floor(pos3.lon))*60;
+    // int lat_degrees = abs((int)(pos3.lat));
+    // double lat_minutes = (pos3.lat - floor(pos3.lat))*60;
+    // int lon_degrees = abs((int)(pos3.lon));
+    // double lon_minutes = (pos3.lon - floor(pos3.lon))*60;
     
-    char NS = (pos3.lat >= 0 ? 'N' : 'S');
-    char EW = (pos3.lon >= 0 ? 'E' : 'W');
-    snprintf(Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
-
+    // char NS = (pos3.lat >= 0 ? 'N' : 'S');
+    // char EW = (pos3.lon >= 0 ? 'E' : 'W');
+    // snprintf(Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+    deg_min(pos3.lat, pos3.lon, *output);
+    strcpy(Triple_Mix_Pos.curr_pos_dm, output);
     
     for(int i = 0; i < NUM_IRU; ++i)
     {

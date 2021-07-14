@@ -9,6 +9,7 @@ extern vect3_t ecef_pos_[NUM_IRU + 1];
 extern bool first_floop;
 extern bool drift;
 extern double nav_start_time;
+extern char output[32];
 extern char sim_pos_dm[32];
 
 
