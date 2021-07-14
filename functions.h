@@ -42,4 +42,7 @@ void triple_mix();
 //cheater function to set current pos and triple mix
 void debug_set_pos();
 
+//converts sim position to deg minute format
+void sim_pos_deg_min();
+
 #endif

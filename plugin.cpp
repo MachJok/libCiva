@@ -9,6 +9,7 @@
 #include "structs.h"
 #include "variables.h"
 
+
 #if IBM
     #include <windows.h>
 #endif
@@ -18,6 +19,7 @@ bool timer_start = {};
 bool old_timer = {true};
 bool first_floop = {true};
 double nav_start_time = {};
+
 
 static float 
 iru_floop(float elapsed1, float elapsed2, int counter, void* refcon);
@@ -50,9 +52,7 @@ PLUGIN_API int XPluginStart
     dcr_init();
     logMsg("C-IVA IRU version: %f, using libacfutils-%s", PLUGIN_VERSION, libacfutils_version);
     MakeDataRefs();
-    logMsg("Make Datarefs DONE");
-
-    
+    logMsg("Make Datarefs DONE");    
     
     return 1;
 }
@@ -85,9 +85,9 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
     GetDataRefs();
     if(!State_New.paused)
     {
-
+        sim_pos_deg_min();
         electrical_source();
-        //debug_set_pos();
+        debug_set_pos();
         
         for(int i = 0; i < NUM_IRU; ++i)
         {   
@@ -114,3 +114,4 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
     }
     return -1;
 }
+

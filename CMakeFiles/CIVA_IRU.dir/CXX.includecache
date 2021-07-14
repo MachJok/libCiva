@@ -6,9 +6,19 @@
 
 #IncludeRegexTransform: 
 
-/home/crash/Desktop/Projects/Dev/CIVA IRU/GeographicLib.h
-sources.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.cpp
+datarefs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
+XPLMUtilities.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/XPLMUtilities.h
+acfutils/dr.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/dr.h
+acfutils/dr_cmd_reg.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/dr_cmd_reg.h
+structs.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
+variables.h
+/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
 
 /home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
 acfutils/dr.h
@@ -17,62 +27,6 @@ sources.h
 /home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
 structs.h
 /home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
-
-/home/crash/Desktop/Projects/Dev/CIVA IRU/functions.cpp
-functions.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/functions.h
-Geodesic.hpp
-/home/crash/Desktop/Projects/Dev/CIVA IRU/Geodesic.hpp
-acfutils/geom.h
--
-acfutils/assert.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/assert.h
-acfutils/helpers.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/helpers.h
-acfutils/log.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/log.h
-acfutils/math.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/math.h
-acfutils/perf.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/perf.h
-acfutils/sysmacros.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/sysmacros.h
-datarefs.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
-structs.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
-variables.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
-algorithm
--
-cassert
--
-cmath
--
-cstdio
--
-cstring
--
-random
--
-type_traits
--
-
-/home/crash/Desktop/Projects/Dev/CIVA IRU/functions.h
-sources.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
-structs.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
-variables.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
-datarefs.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/datarefs.h
-GeographicLib.h
-/home/crash/Desktop/Projects/Dev/CIVA IRU/GeographicLib.h
-acfutils/geom.h
--
-acfutils/perf.h
--
 
 /home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
 cmath
@@ -111,6 +65,10 @@ GeographicLib/Geodesic.hpp
 -
 GeographicLib/Constants.hpp
 -
+XPLMDisplay.h
+-
+XPLMGraphics.h
+-
 
 /home/crash/Desktop/Projects/Dev/CIVA IRU/structs.h
 acfutils/geom.h
@@ -124,10 +82,6 @@ string
 sources.h
 /home/crash/Desktop/Projects/Dev/CIVA IRU/sources.h
 
-/usr/local/include/GeographicLib/Geodesic.hpp
-GeographicLib/Constants.hpp
--
-
 XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
 XPLMDefs.h
 XPLSDK303/CHeaders/XPLM/XPLMDefs.h
@@ -137,6 +91,14 @@ windows.h
 -
 stdint.h
 -
+
+XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+XPLMDefs.h
+XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+
+XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
+XPLMDefs.h
+XPLSDK303/CHeaders/XPLM/XPLMDefs.h
 
 XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
 XPLMDefs.h

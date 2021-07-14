@@ -9,6 +9,8 @@ CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o
  /home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
  XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
  XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+ XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+ XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
  XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
  XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
  libacfutils/include/acfutils/assert.h
@@ -39,6 +41,8 @@ CMakeFiles/CIVA_IRU.dir/functions.cpp.o
  /usr/local/include/GeographicLib/Geodesic.hpp
  XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
  XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+ XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+ XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
  XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
  XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
  libacfutils/include/acfutils/assert.h
@@ -68,6 +72,8 @@ CMakeFiles/CIVA_IRU.dir/plugin.cpp.o
  /home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
  XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
  XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+ XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+ XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
  XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
  XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
  libacfutils/include/acfutils/assert.h
@@ -94,6 +100,8 @@ CMakeFiles/CIVA_IRU.dir/structs.cpp.o
  /home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
  XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
  XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+ XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+ XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
  XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
  XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
  libacfutils/include/acfutils/assert.h

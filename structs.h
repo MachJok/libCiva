@@ -12,6 +12,7 @@ struct triple_mix_pos_t
     geo_pos3_t curr_pos;
     vect2_t velocity_vect;
     vect2_t polar_vel_vect;
+    char curr_pos_dm[32];
 };
 
 struct waypoints

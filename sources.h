@@ -26,9 +26,12 @@
 #include <acfutils/dr.h>
 #include <acfutils/dr_cmd_reg.h>
 
-//geographic lib
+//geographiclib
 #include <GeographicLib/Geodesic.hpp>
 #include <GeographicLib/Constants.hpp>
 
+//window_functions
+#include <XPLMDisplay.h>
+#include <XPLMGraphics.h>
 #endif
 

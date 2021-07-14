@@ -8,6 +8,8 @@ CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: structs.h
 CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: variables.h
 CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
 CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
 CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
 CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
 CMakeFiles/CIVA_IRU.dir/datarefs.cpp.o: libacfutils/include/acfutils/assert.h
@@ -38,6 +40,8 @@ CMakeFiles/CIVA_IRU.dir/functions.cpp.o: variables.h
 CMakeFiles/CIVA_IRU.dir/functions.cpp.o: /usr/local/include/GeographicLib/Geodesic.hpp
 CMakeFiles/CIVA_IRU.dir/functions.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
 CMakeFiles/CIVA_IRU.dir/functions.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+CMakeFiles/CIVA_IRU.dir/functions.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+CMakeFiles/CIVA_IRU.dir/functions.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
 CMakeFiles/CIVA_IRU.dir/functions.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
 CMakeFiles/CIVA_IRU.dir/functions.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
 CMakeFiles/CIVA_IRU.dir/functions.cpp.o: libacfutils/include/acfutils/assert.h
@@ -67,6 +71,8 @@ CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: structs.h
 CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: variables.h
 CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
 CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
 CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
 CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
 CMakeFiles/CIVA_IRU.dir/plugin.cpp.o: libacfutils/include/acfutils/assert.h
@@ -93,6 +99,8 @@ CMakeFiles/CIVA_IRU.dir/structs.cpp.o: structs.h
 CMakeFiles/CIVA_IRU.dir/structs.cpp.o: variables.h
 CMakeFiles/CIVA_IRU.dir/structs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDataAccess.h
 CMakeFiles/CIVA_IRU.dir/structs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDefs.h
+CMakeFiles/CIVA_IRU.dir/structs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMDisplay.h
+CMakeFiles/CIVA_IRU.dir/structs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMGraphics.h
 CMakeFiles/CIVA_IRU.dir/structs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMProcessing.h
 CMakeFiles/CIVA_IRU.dir/structs.cpp.o: XPLSDK303/CHeaders/XPLM/XPLMUtilities.h
 CMakeFiles/CIVA_IRU.dir/structs.cpp.o: libacfutils/include/acfutils/assert.h

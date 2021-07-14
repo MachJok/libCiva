@@ -62,6 +62,7 @@ void MakeDataRefs()
     for (int i = 0; i < NUM_IRU; i++)
     {
         
+        DCR_CREATE_B(NULL, sim_pos_dm, sizeof(sim_pos_dm), true, "omi/iru/sim_pos_dm");
         DCR_CREATE_I(NULL, &IRU[i].nav_mode, true, "omi/iru/%d/mode", i);
         DCR_CREATE_I(NULL, &IRU[i].power_on, true, "omi/iru/%d/power", i);
         DCR_CREATE_I(NULL, &IRU[i].mix_switch, true, "omi/iru/%d/triple_mix_switch", i);
@@ -81,10 +82,13 @@ void MakeDataRefs()
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_ground_vel, 2, true, "omi/iru/%d/ground_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_flight_vel, 2, true, "omi/iru/%d/flight_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_wind_vect, 2, true, "omi/iru/%d/wind_vect",i);
-        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.curr_pos, 2, true, "omi/iru/%d/triple_mix_pos",i);
-        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.velocity_vect, 2, true, "omi/iru/%d/triple_mix_vel_ne",i);
-        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.polar_vel_vect, 2,  true, "omi/iru/%d/triple_mix_vel_vect", i);
         DCR_CREATE_B(NULL, IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
+
+        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.curr_pos, 2, true, "omi/iru/%d/triple_pos",i);
+        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.velocity_vect, 2, true, "omi/iru/%d/triple_vel_ne",i);
+        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.polar_vel_vect, 2,  true, "omi/iru/%d/triple_vel_vect", i);
+        DCR_CREATE_B(NULL, Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), true, "omi/iru/%d/triple_pos_dm", i);
+        
 
         
         /*

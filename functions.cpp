@@ -23,6 +23,7 @@ geo_pos3_t old_pos{0};
 geo_pos3_t pos3{0}; //pos_3 will be the triple mix position
 vect3_t ecef_pos_[NUM_IRU + 1] = {0};
 triple_mix_pos_t Triple_Mix_Pos = {0};
+char sim_pos_dm[32] = {0};
 bool drift = true;
 
 void set_drift_vector()
@@ -113,6 +114,19 @@ void set_velocity_vect(int i)
     IRU[i].polar_ground_vel.y = vect2_abs(IRU[i].velocity_vect);
 
 }
+
+void sim_pos_deg_min()
+{
+    int lat_degrees = abs((int)(State_New.lat));
+    double lat_minutes = (State_New.lat - floor(State_New.lat))*60;
+    int lon_degrees = abs((int)(State_New.lon));
+    double lon_minutes = (State_New.lon - floor(State_New.lon))*60;
+    
+    char NS = (State_New.lat >= 0 ? 'N' : 'S');
+    char EW = (State_New.lon >= 0 ? 'E' : 'W');
+    snprintf(sim_pos_dm, sizeof(sim_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+}
+
 
 
 void true_heading_update(int i)
@@ -219,6 +233,16 @@ void triple_mix()
     ecef_pos_[3].y = (ecef_pos_[0].y + ecef_pos_[1].y + ecef_pos_[2].y) / 3.;
     ecef_pos_[3].z = (ecef_pos_[0].z + ecef_pos_[1].z + ecef_pos_[2].z) / 3.;
     pos3 = ecef2geo(ecef_pos_[3], &wgs84);
+
+    int lat_degrees = abs((int)(pos3.lat));
+    double lat_minutes = (pos3.lat - floor(pos3.lat))*60;
+    int lon_degrees = abs((int)(pos3.lon));
+    double lon_minutes = (pos3.lon - floor(pos3.lon))*60;
+    
+    char NS = (pos3.lat >= 0 ? 'N' : 'S');
+    char EW = (pos3.lon >= 0 ? 'E' : 'W');
+    snprintf(Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+
     
     for(int i = 0; i < NUM_IRU; ++i)
     {
