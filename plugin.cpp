@@ -19,7 +19,7 @@
 bool timer_start = {};
 bool old_timer = {true};
 bool first_floop = {true};
-double nav_start_time = {};
+double nav_start_time = {0};
 char sim_pos_dm[32] = {0};
 
 
@@ -88,8 +88,7 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
     if(!State_New.paused)
     {
         //sim_pos_deg_min();
-        deg_min(State_New.lat, State_New.lon, *output);
-        strcpy(sim_pos_dm, output);
+        deg_min(State_New.lat, State_New.lon, sim_pos_dm, sizeof(sim_pos_dm));
 
         electrical_source();
         debug_set_pos();

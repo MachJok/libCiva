@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <random>
@@ -119,13 +120,12 @@ void set_velocity_vect(int i)
 
 }
 
-void deg_min(double lat, double lon, char &output)
+void deg_min(double lat, double lon, char *output, size_t cap)
 {
     int lat_degrees = abs(lat);
     double lat_minutes = (abs(lat) - floor(abs(lat)))*60;
     int lon_degrees = abs(lon);
     double lon_minutes = (abs(lon) - floor(abs(lon)))*60;;
-    char buffer[32]={0};
     while (lat_minutes > 60)
     {
         lat_minutes = clamp(lon_minutes, 0, 59.9);
@@ -136,7 +136,7 @@ void deg_min(double lat, double lon, char &output)
     }
     char NS = (lat >= 0 ? 'N' : 'S');
     char EW = (lon >= 0 ? 'E' : 'W');
-    output = snprintf(buffer, sizeof(buffer), "%c%02d* %02.1f', %c%03d* %02.1f'", NS, lat_degrees,  lat_minutes, EW, lon_degrees, lon_minutes);  
+    snprintf(output, cap, "%c%02d* %02.1f', %c%03d* %02.1f'", NS, lat_degrees,  lat_minutes, EW, lon_degrees, lon_minutes);  
 }
 
 // void sim_pos_deg_min()
@@ -208,8 +208,7 @@ void current_pos_update(int i)
     // char NS = (IRU[i].current_pos.lat >= 0 ? 'N' : 'S');
     // char EW = (IRU[i].current_pos.lon >= 0 ? 'E' : 'W');
     // snprintf(IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
-    deg_min(IRU[i].current_pos.lat, IRU[i].current_pos.lon, *output);
-    strcpy(IRU[i].curr_pos_dm, output);
+    deg_min(IRU[i].current_pos.lat, IRU[i].current_pos.lon, IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm));
 
     
     //Altitude and TAS input into IRU. ADC1 -> IRU1/3, ADC 2 -> IRU2
@@ -267,8 +266,8 @@ void triple_mix()
     // char NS = (pos3.lat >= 0 ? 'N' : 'S');
     // char EW = (pos3.lon >= 0 ? 'E' : 'W');
     // snprintf(Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
-    deg_min(pos3.lat, pos3.lon, *output);
-    strcpy(Triple_Mix_Pos.curr_pos_dm, output);
+    deg_min(pos3.lat, pos3.lon, Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm));
+    
     
     for(int i = 0; i < NUM_IRU; ++i)
     {

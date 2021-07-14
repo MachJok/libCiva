@@ -7,6 +7,7 @@
 #include "GeographicLib.h"
 #include <acfutils/geom.h>
 #include <acfutils/perf.h>
+#include <cstddef>
 
 
 //sets random drift vector using MT19937 and stores to IRU, called in iru_init
@@ -45,6 +46,6 @@ void debug_set_pos();
 //converts sim position to deg minute format
 // void sim_pos_deg_min();
 
-void deg_min(double lat, double lon, char& output);
+void deg_min(double lat, double lon, char* output, size_t cap);
 
 #endif
