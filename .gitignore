@@ -6,3 +6,7 @@ build (copy)/
 CMakeFiles (copy)/
 cmake_install.cmake
 CMakeLists.txt
+cmake_install.cmake
+compile_commands.json
+Makefile
+CMakeCache.txt
