@@ -2,5 +2,7 @@ XPLSDK303/
 libacfutils/
 CMakeFiles/
 build/
+build (copy)/
+CMakeFiles (copy)/
 cmake_install.cmake
 CMakeLists.txt
