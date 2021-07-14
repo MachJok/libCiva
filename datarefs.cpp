@@ -70,6 +70,7 @@ void MakeDataRefs()
         DCR_CREATE_F64(NULL, &IRU[i].drift_angle, true, "omi/iru/%d/drift_angle", i);
         DCR_CREATE_F64(NULL, &IRU[i].tas, true, "omi/iru/%d/tas", i);
         DCR_CREATE_F64(NULL, &IRU[i].heading_true,true,"omi/iru/%d/heading", i);
+        DCR_CREATE_F64(NULL, &IRU[i].time_in_nav,true,"omi/iru/%d/time_in_nav", i);
 
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].current_pos, 2, true, "omi/iru/%d/iru_pos", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].align_pos, 2, true, "omi/iru/%d/align_pos", i);
@@ -83,7 +84,7 @@ void MakeDataRefs()
         DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.curr_pos, 2, true, "omi/iru/%d/triple_mix_pos",i);
         DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.velocity_vect, 2, true, "omi/iru/%d/triple_mix_vel_ne",i);
         DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.polar_vel_vect, 2,  true, "omi/iru/%d/triple_mix_vel_vect", i);
-
+        DCR_CREATE_B(NULL, IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
 
         
         /*

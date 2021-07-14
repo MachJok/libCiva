@@ -14,8 +14,10 @@
 #endif
 
 #define PLUGIN_VERSION 210711.0651
-
-bool first_floop = true;
+bool timer_start = {};
+bool old_timer = {true};
+bool first_floop = {true};
+double nav_start_time = {};
 
 static float 
 iru_floop(float elapsed1, float elapsed2, int counter, void* refcon);
@@ -85,12 +87,20 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
     {
 
         electrical_source();
-        debug_set_pos();
+        //debug_set_pos();
+        
         for(int i = 0; i < NUM_IRU; ++i)
-        {
+        {   
+
             if(IRU[i].nav_mode > 2)
             {
-                
+                timer_start = true;
+                if(timer_start && old_timer == timer_start)
+                {
+                    nav_start_time = State_New.runtime;
+                    timer_start = false;
+                    old_timer = false;
+                }
                 current_pos_update(i);
 
             }

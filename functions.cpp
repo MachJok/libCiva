@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <random>
 #include <type_traits>
 
@@ -152,22 +154,34 @@ void current_pos_update(int i)
     //compute distance travelled in 1 frame and direction
     //MAKE NEW FUNCTION since velocities are now MAG-N/MAG-E not DIR/MAG
 
+    IRU[i].time_in_nav = State_New.runtime - nav_start_time;
+
     double az = IRU[i].polar_ground_vel.x;
     double dist = vect2_abs(IRU[i].velocity_vect) * State_New.frame_time;
     double old_lat = IRU[i].current_pos.lat;
     double old_lon = IRU[i].current_pos.lon;
     //in: lat1, lat2, crs, dist, out: new lat, new lon
     geod.Direct(old_lat, old_lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
+    int lat_degrees = abs((int)(IRU[i].current_pos.lat));
+    double lat_minutes = (IRU[i].current_pos.lat - floor(IRU[i].current_pos.lat))*60;
+    int lon_degrees = abs((int)(IRU[i].current_pos.lon));
+    double lon_minutes = (IRU[i].current_pos.lon - floor(IRU[i].current_pos.lon))*60;
+    
+    char NS = (IRU[i].current_pos.lat >= 0 ? 'N' : 'S');
+    char EW = (IRU[i].current_pos.lon >= 0 ? 'E' : 'W');
+    snprintf(IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
+
+
     
     //Altitude and TAS input into IRU. ADC1 -> IRU1/3, ADC 2 -> IRU2
     for(int i = 0; i < NUM_IRU; ++i)
     {
-        if(i == 2)
+        if(i == 2 && IRU[i].nav_mode == 3)
         {
             IRU[i].current_pos.elev = FEET2MET(State_New.alt_ft_[0]);
             IRU[i].tas = KT2MPS(State_New.tas_kt_[0]);
         }
-        else
+        else if(IRU[i].nav_mode == 3)
         {
             IRU[i].current_pos.elev = FEET2MET(State_New.alt_ft_[i]);
             IRU[i].tas = KT2MPS(State_New.tas_kt_[i]);
@@ -176,13 +190,16 @@ void current_pos_update(int i)
 
     if(NUM_IRU > 2)
     {    
-        if(!IRU[0].mix_switch || !IRU[1].mix_switch || !IRU[2].mix_switch)
+        if((!IRU[0].mix_switch || !IRU[1].mix_switch || !IRU[2].mix_switch) || 
+            (IRU[0].nav_mode != 3 && IRU[1].nav_mode != 3 && IRU[2].nav_mode != 3))
         {
             Triple_Mix_Pos.curr_pos = {0};
             Triple_Mix_Pos.velocity_vect = {0};
             Triple_Mix_Pos.polar_vel_vect = {0};
         }
-        else if(IRU[0].mix_switch && IRU[1].mix_switch && IRU[2].mix_switch)
+        //all mix switches must be on and all units in nav mode
+        else if((IRU[0].mix_switch && IRU[1].mix_switch && IRU[2].mix_switch) && 
+                (IRU[0].nav_mode == 3 && IRU[1].nav_mode == 3 && IRU[2].nav_mode == 3))
         {
             triple_mix();
         }
@@ -214,11 +231,8 @@ void triple_mix()
         dist = {};
         // IN:lat1, lon1, lat2, lon2 out: dist, az12, az21
         geod.Inverse(old_pos.lat, old_pos.lon, pos3.lat, pos3.lon, dist, az, trash_val);
-        Triple_Mix_Pos.polar_vel_vect.x = az;
-        Triple_Mix_Pos.polar_vel_vect.y = dist / State_New.frame_time;
-        Triple_Mix_Pos.polar_vel_vect.x = normalize_hdg(Triple_Mix_Pos.polar_vel_vect.x);
-        Triple_Mix_Pos.velocity_vect.x = dist * sin(DEG2RAD(az)) / State_New.frame_time;
-        Triple_Mix_Pos.velocity_vect.y = dist * cos(DEG2RAD(az)) / State_New.frame_time;
+        Triple_Mix_Pos.polar_vel_vect = {normalize_hdg(az), dist / State_New.frame_time};
+        Triple_Mix_Pos.velocity_vect = {vect2_scmul(hdg2dir(az), dist / State_New.frame_time)};
     }    
 }
 

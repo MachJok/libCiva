@@ -3,6 +3,7 @@
 
 #include "acfutils/geom.h"
 #include "variables.h"
+#include <string>
 
 //sim state variables
 
@@ -28,6 +29,8 @@ struct IRU_t
     int batt_self_test; //battery self test light during alignment
     geo_pos3_t current_pos; //computed from align pos and fwd propogation
     geo_pos3_t align_pos; //input for alignment - no cheating, bad pos = bad nav
+    geo_pos2_t update_pos;
+    char curr_pos_dm[32];
     //triple_mix_pos_t triple_mix_pos_wgs;
     vect2_t pos_drift_vect; //unit sensor bias rectangular velocities 
     vect2_t polar_pos_drift;//unit sensor bias polar coordinates
@@ -43,6 +46,7 @@ struct IRU_t
     double cross_track_err;
     double track_ang_err;
     double tas;
+    double time_in_nav;
 };
 
 struct Sim_State_t

@@ -49,6 +49,10 @@ cassert
 -
 cmath
 -
+cstdio
+-
+cstring
+-
 random
 -
 type_traits
@@ -113,6 +117,8 @@ acfutils/geom.h
 /home/crash/Desktop/Projects/Dev/CIVA IRU/acfutils/geom.h
 variables.h
 /home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
+string
+-
 
 /home/crash/Desktop/Projects/Dev/CIVA IRU/variables.h
 sources.h
