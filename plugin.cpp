@@ -15,7 +15,7 @@
     #include <windows.h>
 #endif
 
-#define PLUGIN_VERSION 210711.0651
+#define PLUGIN_VERSION 210714.0846
 bool timer_start = {};
 bool old_timer = {true};
 bool first_floop = {true};
