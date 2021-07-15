@@ -72,7 +72,7 @@ include_directories(CIVA_IRU PUBLIC
 # Compiler flag specification
 # Always recommend maximum warnings and warnings-to-errors on,
 # but of course, customize to your needs.
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wextra -Werror --std=c17 \
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wextra -Werror -pedantic --std=c11 \
     -Wno-unused-local-typedefs -Wno-missing-field-initializers")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14" )
 
@@ -93,11 +93,12 @@ endif()
 # in the system's standard library search paths. If found, "MY_LIB_NAME"
 # will be defined how the linking commands to link that library into the
 # resulting binary.
-#find_library(LIACFUTILS "libacfutils")
+#find_library(LIBACFUTILS "libacfutils")
+
 
 # You can also manually provide a search path
 #find_library(BAR_LIBRARY "bar" "/search/for/it/here")
-find_package(GeographicLib REQUIRED)
+#find_package(GeographicLib REQUIRED)
 
 # Alternatively, when using a static library, you can literally just use
 # the exact library file as a linker input:
@@ -112,12 +113,16 @@ endif()
 # of the libacfutils-redist package
 
 set(LIBACFUTILS "${CMAKE_SOURCE_DIR}/libacfutils")
+#set(GEOGRAPHIC_LIB "${CMAKE_SOURCE_DIR}/geographic_lib")
+find_library(LIBACFUTILS_LIBS acfutils "${LIBACFUTILS}/${ARCH}/lib")
+find_library(GEOGRAPHIC_LIB Geographic "${CMAKE_SOURCE_DIR}/geographic_lib")
 
-file(GLOB LIBACFUTILS_LIBS ${LIBACFUTILS}/${ARCH}/lib/*.a)
+#file(GLOB LIBACFUTILS_LIBS ${LIBACFUTILS}/${ARCH}/lib/*.a)
+#file(GLOB GEOGRAPHIC_LIB ${CMAKE_SOURCE_DIR}/geographic_lib/*.a)
 
 target_link_libraries(CIVA_IRU
     ${LIBACFUTILS_LIBS}
-	${GeographicLib_LIBRARIES}      
+	${GEOGRAPHIC_LIB}      
 )
 
 # This avoids prepending or appending any `lib' or `-<version>' extensions

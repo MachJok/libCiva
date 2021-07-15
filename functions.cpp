@@ -94,7 +94,7 @@ void iru_init()
         IRU[i].current_pos.elev = 0;
         IRU[i].align_pos.elev = 0;
         
-        logMsg("IRU-%i Drift Vector: (%02f, %02f)", i+1, IRU[i].pos_drift_vect.x, IRU[i].pos_drift_vect.y);
+        logMsg("IRU-%i Drift Vector: (%03f, %03f)", i+1, IRU[i].pos_drift_vect.x, IRU[i].pos_drift_vect.y);
         logMsg("IRU-%i init True Heading: %f", i+1, IRU[i].heading_true);
     }
     logMsg("IRU INIT COMPLETE: ");
@@ -126,11 +126,11 @@ void deg_min(double lat, double lon, char *output, size_t cap)
     double lat_minutes = (abs(lat) - floor(abs(lat)))*60;
     int lon_degrees = abs(lon);
     double lon_minutes = (abs(lon) - floor(abs(lon)))*60;;
-    while (lat_minutes > 60)
+    while (lat_minutes > 59.9)
     {
         lat_minutes = clamp(lon_minutes, 0, 59.9);
     }
-    while (lon_minutes > 60)
+    while (lon_minutes > 59.9)
     {
         lon_minutes = clamp(lon_minutes, 0, 59.9);
     }
