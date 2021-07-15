@@ -113,8 +113,8 @@ void set_velocity_vect(int i)
     double hdg = IRU[i].heading_true;
     double tas = IRU[i].tas;
     IRU[i].flight_vect = vect2_scmul(hdg2dir(hdg), tas);
-    IRU[i].polar_flight_vel.x = dir2hdg(IRU[i].flight_vect);
-    IRU[i].polar_flight_vel.y = vect2_abs(IRU[i].flight_vect);
+    IRU[i].polar_flight_vel.x = hdg;
+    IRU[i].polar_flight_vel.y = tas;
     IRU[i].polar_ground_vel.x = dir2hdg(IRU[i].velocity_vect);
     IRU[i].polar_ground_vel.y = vect2_abs(IRU[i].velocity_vect);
 
