@@ -2,6 +2,7 @@
 #include "XPLMUtilities.h"
 #include "acfutils/dr.h"
 #include "acfutils/dr_cmd_reg.h"
+#include "functions.h"
 #include "structs.h"
 #include "variables.h"
 
@@ -24,7 +25,9 @@ void LoadDataRefs()
     fdr_find(&Sim_ALT_R,"sim/cockpit2/gauges/indicators/airspeed_kts_copilot");
     fdr_find(&Sim_Ground_Speed, "sim/flightmodel/position/groundspeed");
     fdr_find(&Sim_TAS,"sim/flightmodel/position/true_airspeed");
-    fdr_find(&Sim_True_Track, "sim/flightmodel/position/hpath");   
+    fdr_find(&Sim_True_Track, "sim/flightmodel/position/hpath");
+    fdr_find(&Sim_VH_IND_FPM2, "sim/flightmodel/position/vh_ind_fpm2");
+    fdr_find(&Sim_Elev_mtr,"sim/flightmodel/position/elevation");
 
 }
 
@@ -35,7 +38,7 @@ void GetDataRefs()
     {
         State_Old.IRU[i] = IRU[i];
     }
-    State_Old.Triple_Mix_Pos = Triple_Mix_Pos;
+
     State_New.paused = dr_geti(&Sim_Paused);
     State_New.frame_time = dr_getf_prot(&Sim_Frame_Time);
     State_New.runtime = dr_getf_prot(&Sim_RunTime);
@@ -52,13 +55,16 @@ void GetDataRefs()
     State_New.alt_ft_[1] = dr_getf_prot(&Sim_ALT_R);
     State_New.true_trk = dr_getf_prot(&Sim_True_Track);
     State_New.ground_speed = dr_getf_prot(&Sim_Ground_Speed);
-
-    
+    State_New.vh_ind_fpm2 = dr_getf_prot(&Sim_VH_IND_FPM2);
+    State_New.elev_mtr = dr_getf_prot(&Sim_Elev_mtr);    
 }
 
 void MakeDataRefs()
 {
-    DCR_CREATE_B(NULL, sim_pos_dm, sizeof(sim_pos_dm), true, "omi/iru/sim_pos_dm");
+    DCR_CREATE_B(NULL, &sim_pos_dm, sizeof(sim_pos_dm), true, "omi/iru/sim_pos_dm");
+    DCR_CREATE_VF64(NULL, (double *) &mix_pos, 3, true, "omi/iru/triple_pos");
+    
+
     for (int i = 0; i < NUM_IRU; i++)
     {
         
@@ -82,15 +88,12 @@ void MakeDataRefs()
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_ground_vel, 2, true, "omi/iru/%d/ground_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_flight_vel, 2, true, "omi/iru/%d/flight_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_wind_vect, 2, true, "omi/iru/%d/wind_vect",i);
-        DCR_CREATE_B(NULL, IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
+        DCR_CREATE_B(NULL, &IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
 
-        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.curr_pos, 2, true, "omi/iru/%d/triple_pos",i);
-        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.velocity_vect, 2, true, "omi/iru/%d/triple_vel_en",i);
-        DCR_CREATE_VF64(NULL, (double *) &Triple_Mix_Pos.polar_vel_vect, 2,  true, "omi/iru/%d/triple_vel_vect", i);
-        DCR_CREATE_B(NULL, Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), true, "omi/iru/%d/triple_pos_dm", i);
-        
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_pos, 2, true, "omi/iru/%d/triple_pos",i);
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_vect, 2, true, "omi/iru/%d/triple_vel_en",i);
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_mix_vel, 2,  true, "omi/iru/%d/triple_vel_vect", i);
 
-        
         /*
         *DCR_CREATE_F64(NULL, &IRU[i].current_pos.lat, true, "omi/iru/%d/iru_pos_lat", i);
         *DCR_CREATE_F64(NULL, &IRU[i].current_pos.lon, true, "omi/iru/%d/iru_pos_lon", i);

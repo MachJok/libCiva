@@ -29,6 +29,7 @@
 //geographiclib
 #include <GeographicLib/Geodesic.hpp>
 #include <GeographicLib/Constants.hpp>
+#include <GeographicLib/Geocentric.hpp>
 
 //window_functions
 #include <XPLMDisplay.h>

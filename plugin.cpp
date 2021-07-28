@@ -15,7 +15,7 @@
     #include <windows.h>
 #endif
 
-#define PLUGIN_VERSION 210714.0846
+#define PLUGIN_VERSION 210726.0802
 bool timer_start = {};
 bool old_timer = {true};
 bool first_floop = {true};
@@ -112,7 +112,9 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
 
         if(first_floop)
         {
+            
             logMsg("Successfully Entered flight loop");
+            
             first_floop = false;
         }
     }

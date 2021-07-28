@@ -21,7 +21,8 @@ static dr_t Sim_TAS_L;
 static dr_t Sim_TAS_R;
 static dr_t Sim_ALT_L;
 static dr_t Sim_ALT_R;
-
+static dr_t Sim_VH_IND_FPM2;
+static dr_t Sim_Elev_mtr;
 
 //function loads required datarefs
 void LoadDataRefs();

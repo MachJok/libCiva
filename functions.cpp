@@ -23,10 +23,8 @@
 
 
 geo_pos3_t old_pos{0};
-geo_pos3_t pos3{0}; //pos_3 will be the triple mix position
+geo_pos3_t mix_pos{0}; //pos_3 will be the triple mix position
 vect3_t ecef_pos_[NUM_IRU + 1] = {0};
-triple_mix_pos_t Triple_Mix_Pos = {0};
-
 
 bool drift = true;
 char output[32] = {0};
@@ -41,15 +39,11 @@ void set_drift_vector()
         std::mt19937 gen(rd());
         for(int i = 0; i<NUM_IRU; ++i)
         {
-            bool try_again = true;
-            while (try_again)
+            std::normal_distribution<double> normal_dist(1.35, 0.41994);//normal dist centered on 0
+            drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
+            if(drift_mag < 0)
             {
-                std::normal_distribution<double> normal_dist(1.35, 0.41994);
-                drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
-                if(drift_mag > 0)
-                {
-                    try_again = false;
-                }
+                drift_mag = -drift_mag;
             }
             std::mt19937 gen2(rd());
             std::uniform_real_distribution<double> uniform_dist(0, 360);
@@ -86,6 +80,7 @@ void iru_init()
 {
     drift = true;
     set_drift_vector();
+    set_true_hdg_offset();
     //set_true_hdg_offset();
     
     for (int i = 0; i < NUM_IRU; ++i)
@@ -139,19 +134,6 @@ void deg_min(double lat, double lon, char *output, size_t cap)
     snprintf(output, cap, "%c%02d* %02.1f', %c%03d* %02.1f'", NS, lat_degrees,  lat_minutes, EW, lon_degrees, lon_minutes);  
 }
 
-// void sim_pos_deg_min()
-// {
-//     int lat_degrees = abs((int)(State_New.lat));
-//     double lat_minutes = (State_New.lat - floor(State_New.lat))*60;
-//     int lon_degrees = abs((int)(State_New.lon));
-//     double lon_minutes = (State_New.lon - floor(State_New.lon))*60;
-    
-//     char NS = (State_New.lat >= 0 ? 'N' : 'S');
-//     char EW = (State_New.lon >= 0 ? 'E' : 'W');
-//     snprintf(sim_pos_dm, sizeof(sim_pos_dm), "%c%02d* %02.1f', %c%03d* %02.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
-// }
-
-
 
 void true_heading_update(int i)
 {
@@ -189,25 +171,18 @@ void current_pos_update(int i)
     set_velocity_vect(i);
     true_heading_update(i);
     wind_vect_update(i);
+
     //compute distance travelled in 1 frame and direction
     //MAKE NEW FUNCTION since velocities are now MAG-N/MAG-E not DIR/MAG
 
     IRU[i].time_in_nav = State_New.runtime - nav_start_time;
 
+
     double az = IRU[i].polar_ground_vel.x;
     double dist = vect2_abs(IRU[i].velocity_vect) * State_New.frame_time;
     double old_lat = IRU[i].current_pos.lat;
     double old_lon = IRU[i].current_pos.lon;
-    //in: lat1, lat2, crs, dist, out: new lat, new lon
     geod.Direct(old_lat, old_lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
-    // int lat_degrees = abs((int)(IRU[i].current_pos.lat));
-    // double lat_minutes = (IRU[i].current_pos.lat - floor(IRU[i].current_pos.lat))*60;
-    // int lon_degrees = abs((int)(IRU[i].current_pos.lon));
-    // double lon_minutes = (IRU[i].current_pos.lon - floor(IRU[i].current_pos.lon))*60;
-    
-    // char NS = (IRU[i].current_pos.lat >= 0 ? 'N' : 'S');
-    // char EW = (IRU[i].current_pos.lon >= 0 ? 'E' : 'W');
-    // snprintf(IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
     deg_min(IRU[i].current_pos.lat, IRU[i].current_pos.lon, IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm));
 
     
@@ -226,63 +201,70 @@ void current_pos_update(int i)
         }
     }
 
-    if(NUM_IRU > 2)
+    if(!IRU[i].mix_switch || IRU[i].nav_mode != 3 || NUM_IRU < 3)
+    {
+        IRU[i].mix_pos = {0};
+        IRU[i].mix_vect = {0};
+        IRU[i].polar_mix_vel = {0};
+    }
+
+    if(NUM_IRU > 2 && (IRU[i].mix_switch && IRU[i].nav_mode == 3))
     {    
-        if((!IRU[0].mix_switch || !IRU[1].mix_switch || !IRU[2].mix_switch) || 
-            (IRU[0].nav_mode != 3 && IRU[1].nav_mode != 3 && IRU[2].nav_mode != 3))
-        {
-            Triple_Mix_Pos.curr_pos = {0};
-            Triple_Mix_Pos.velocity_vect = {0};
-            Triple_Mix_Pos.polar_vel_vect = {0};
-        }
-        //all mix switches must be on and all units in nav mode
-        else if((IRU[0].mix_switch && IRU[1].mix_switch && IRU[2].mix_switch) && 
-                (IRU[0].nav_mode == 3 && IRU[1].nav_mode == 3 && IRU[2].nav_mode == 3))
-        {
-            triple_mix();
-        }
+        triple_mix();
+
+        // if(!IRU[i].mix_switch)
+        // {
+        //     IRU[i].mix_pos = {0};
+        //     IRU[i].mix_vect = {0};
+        //     IRU[i].polar_mix_vel = {0};
+        // }
+        // //all mix switches must be on and all units in nav mode
+        // else if((IRU[i].mix_switch && IRU[i].nav_mode == 3))
+        // {
+        //     triple_mix();
+        // }
     }
 
 }
 
+static void ecef_convert_curr_pos(double lat, double lon, double h, vect3_t &ecef_pos)
+{
+    ecef.Forward(lat, lon, h, ecef_pos.x, ecef_pos.y, ecef_pos.z);
+}
+
 void triple_mix()
 {    
-    for(int i = 0; i < NUM_IRU; ++i) //convert current position from each IRU into ECEF coordinates at 0 altitude
-    {
-        ecef_pos_[i] = geo2ecef_mtr(IRU[i].current_pos, &wgs84);
-    }
-    //compute the unweighted average of the 3 ECEF positions as the triple mix
-    //convert back to wgs84 and store
-    ecef_pos_[3].x = (ecef_pos_[0].x + ecef_pos_[1].x + ecef_pos_[2].x) / 3.;
-    ecef_pos_[3].y = (ecef_pos_[0].y + ecef_pos_[1].y + ecef_pos_[2].y) / 3.;
-    ecef_pos_[3].z = (ecef_pos_[0].z + ecef_pos_[1].z + ecef_pos_[2].z) / 3.;
-    pos3 = ecef2geo(ecef_pos_[3], &wgs84);
+    double max_lat, max_lon, min_lat, min_lon;
 
-    // int lat_degrees = abs((int)(pos3.lat));
-    // double lat_minutes = (pos3.lat - floor(pos3.lat))*60;
-    // int lon_degrees = abs((int)(pos3.lon));
-    // double lon_minutes = (pos3.lon - floor(pos3.lon))*60;
-    
-    // char NS = (pos3.lat >= 0 ? 'N' : 'S');
-    // char EW = (pos3.lon >= 0 ? 'E' : 'W');
-    // snprintf(Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm), "%c%2d* %2.1f', %c%3d* %2.1f'", NS, lat_degrees, lat_minutes, EW, lon_degrees, lon_minutes);
-    deg_min(pos3.lat, pos3.lon, Triple_Mix_Pos.curr_pos_dm, sizeof(Triple_Mix_Pos.curr_pos_dm));
-    
-    
-    for(int i = 0; i < NUM_IRU; ++i)
+    //return max/min(IRU1,IRU2,IRU3)
+    max_lat = std::max({IRU[0].current_pos.lat, IRU[1].current_pos.lat, IRU[2].current_pos.lat});
+    min_lat = std::min({IRU[0].current_pos.lat, IRU[1].current_pos.lat, IRU[2].current_pos.lat});
+    max_lon = std::max({IRU[0].current_pos.lon, IRU[1].current_pos.lon, IRU[2].current_pos.lon});
+    min_lon = std::min({IRU[0].current_pos.lon, IRU[1].current_pos.lon, IRU[2].current_pos.lon});
+    vect3_t max_ecef, min_ecef, mid_ecef;
+    ecef_convert_curr_pos(max_lat, max_lon, 0, max_ecef);
+    ecef_convert_curr_pos(min_lat, min_lon, 0, min_ecef);
+    mid_ecef = {(max_ecef.x + min_ecef.x) / 2., (max_ecef.y + min_ecef.y) / 2., (max_ecef.z + min_ecef.z) / 2.};
+    mix_pos = ecef2geo(mid_ecef, &wgs84);
+    mix_pos.lon = normalize_lon(mix_pos.lon);
+
+    for (int i = 0; i < NUM_IRU; ++i)
     {
-        //assign values for easier input
-        Triple_Mix_Pos.curr_pos = pos3;
-        old_pos.lat = State_Old.Triple_Mix_Pos.curr_pos.lat;
-        old_pos.lon = State_Old.Triple_Mix_Pos.curr_pos.lon;
+        
+        IRU[i].mix_pos = {mix_pos.lat, mix_pos.lon};
+        deg_min(IRU[i].mix_pos.lat, IRU[i].mix_pos.lon, IRU[i].mix_pos_dm, sizeof(IRU[i].mix_pos_dm));
+        old_pos.lat = State_Old.IRU[i].mix_pos.lat;
+        old_pos.lon = State_Old.IRU[i].mix_pos.lon;
         double trash_val, az, dist;
         az = {};
         dist = {};
         // IN:lat1, lon1, lat2, lon2 out: dist, az12, az21
-        geod.Inverse(old_pos.lat, old_pos.lon, pos3.lat, pos3.lon, dist, az, trash_val);
-        Triple_Mix_Pos.polar_vel_vect = {normalize_hdg(az), dist / State_New.frame_time};
-        Triple_Mix_Pos.velocity_vect = {vect2_scmul(hdg2dir(az), dist / State_New.frame_time)};
-    }    
+        geod.Inverse(old_pos.lat, old_pos.lon, IRU[i].mix_pos.lat, IRU[i].mix_pos.lon, dist, az, trash_val);
+        IRU[i].polar_mix_vel = {normalize_hdg(az), dist / State_New.frame_time};
+        IRU[i].mix_vect = {vect2_scmul(hdg2dir(az), dist / State_New.frame_time)};
+
+    }
+        
 }
 
 void electrical_source()
@@ -293,7 +275,7 @@ void electrical_source()
         {
             if ((!State_New.apu_gen_on && !State_New.eng_gen_on[j]) && IRU[i].nav_mode > 0) 
             {
-                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, 900, 1);
+                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, State_New.frame_time, 1);
                 IRU[i].power_on = 0;
             }
             else if(IRU[i].batt_capacity_sec <= 900 && (State_New.apu_gen_on || State_New.eng_gen_on[j]))
@@ -315,7 +297,7 @@ void debug_set_pos() //shortcut for entering position
             IRU[i].current_pos.lat = State_New.lat;
             IRU[i].current_pos.lon = State_New.lon;
             IRU[i].nav_mode = 3;
-            IRU[i].mix_switch = 1;
+            IRU[i].mix_switch = 0;
         }    
     }
 }
