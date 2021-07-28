@@ -1,7 +1,4 @@
-Currently linux only
-
-Required installed libraries:
-1) GeoGraphicLib: https://geographiclib.sourceforge.io/
+Currently linux only, please feel free to fork for other operating systems
 
 Required Libraries:
 2) libAcfUtils: https://github.com/skiselkov/libacfutils/releases
