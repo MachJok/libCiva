@@ -15,7 +15,7 @@
     #include <windows.h>
 #endif
 
-#define PLUGIN_VERSION 210726.0802
+#define PLUGIN_VERSION 210730.0748
 bool timer_start = {};
 bool old_timer = {true};
 bool first_floop = {true};
@@ -106,6 +106,7 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
                     old_timer = false;
                 }
                 current_pos_update(i);
+                waypoint_selector_clamp(i);
 
             }
         }

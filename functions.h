@@ -48,4 +48,10 @@ void debug_set_pos();
 
 void deg_min(double lat, double lon, char* output, size_t cap);
 
+void ecef_convert_geo_pos2(geo_pos2_t pos, vect3_t &ecef_pos);
+
+void ecef_convert_geo_pos3(geo_pos3_t pos, vect3_t &ecef_pos);
+
+void waypoint_selector_clamp(int i);
+
 #endif

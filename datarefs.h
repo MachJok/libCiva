@@ -23,6 +23,14 @@ static dr_t Sim_ALT_L;
 static dr_t Sim_ALT_R;
 static dr_t Sim_VH_IND_FPM2;
 static dr_t Sim_Elev_mtr;
+static dr_t Sim_NAV1_Freq;
+static dr_t Sim_NAV2_Freq;
+static dr_t Sim_NAV1_DME;
+static dr_t Sim_NAV2_DME;
+static dr_t Sim_Pitot1_Fail;
+static dr_t Sim_Pitot2_Fail;
+static dr_t Sim_Static1_Fail;
+static dr_t Sim_Static2_Fail;
 
 //function loads required datarefs
 void LoadDataRefs();

@@ -16,6 +16,7 @@ set(SRC
 	functions.cpp
 	plugin.cpp
 	structs.cpp
+	dme_functions.cpp
 	)
 set(HDR
     datarefs.h
@@ -23,7 +24,8 @@ set(HDR
 	GeographicLib.h
 	sources.h
 	structs.h
-	variables.h)
+	variables.h
+	dme_functions.h)
 # To recall a variable use ${VARNAME}
 set(ALL_SRC ${SRC} ${HDR})
 

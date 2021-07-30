@@ -21,15 +21,22 @@ void LoadDataRefs()
     fdr_find(&Sim_Paused, "sim/time/paused");
     fdr_find(&Sim_TAS_L,"sim/cockpit2/gauges/indicators/true_airspeed_kts_pilot");
     fdr_find(&Sim_TAS_R,"sim/cockpit2/gauges/indicators/true_airspeed_kts_copilot");
-    fdr_find(&Sim_ALT_L,"sim/cockpit2/gauges/indicators/airspeed_kts_pilot");
-    fdr_find(&Sim_ALT_R,"sim/cockpit2/gauges/indicators/airspeed_kts_copilot");
+    fdr_find(&Sim_ALT_L,"sim/cockpit2/gauges/indicators/altitude_ft_pilot");
+    fdr_find(&Sim_ALT_R,"sim/cockpit2/gauges/indicators/altitude_ft_copilot");
     fdr_find(&Sim_Ground_Speed, "sim/flightmodel/position/groundspeed");
     fdr_find(&Sim_TAS,"sim/flightmodel/position/true_airspeed");
     fdr_find(&Sim_True_Track, "sim/flightmodel/position/hpath");
     fdr_find(&Sim_VH_IND_FPM2, "sim/flightmodel/position/vh_ind_fpm2");
     fdr_find(&Sim_Elev_mtr,"sim/flightmodel/position/elevation");
-
-}
+    fdr_find(&Sim_NAV1_Freq, "sim/cockpit/radios/nav1_freq_hz");
+    fdr_find(&Sim_NAV2_Freq, "sim/cockpit/radios/nav2_freq_hz");
+    fdr_find(&Sim_NAV1_DME, "sim/cockpit/radios/nav1_dme_dist_m");
+    fdr_find(&Sim_NAV2_DME, "sim/cockpit/radios/nav2_dme_dist_m");
+    fdr_find(&Sim_Pitot1_Fail, "sim/operation/failures/rel_pitot");
+    fdr_find(&Sim_Pitot2_Fail, "sim/operation/failures/rel_pitot2");
+    fdr_find(&Sim_Static1_Fail, "sim/operation/failures/rel_static");
+    fdr_find(&Sim_Static2_Fail, "sim/operation/failures/rel_static2");
+    }
 
 void GetDataRefs()
 {
@@ -56,7 +63,15 @@ void GetDataRefs()
     State_New.true_trk = dr_getf_prot(&Sim_True_Track);
     State_New.ground_speed = dr_getf_prot(&Sim_Ground_Speed);
     State_New.vh_ind_fpm2 = dr_getf_prot(&Sim_VH_IND_FPM2);
-    State_New.elev_mtr = dr_getf_prot(&Sim_Elev_mtr);    
+    State_New.elev_mtr = dr_getf_prot(&Sim_Elev_mtr); 
+    State_New.nav1_freq_hz = dr_getf_prot(&Sim_NAV1_Freq);
+    State_New.nav2_freq_hz = dr_getf_prot(&Sim_NAV2_Freq);
+    State_New.nav1_dme_nm = dr_getf_prot(&Sim_NAV1_DME);
+    State_New.nav2_dme_nm = dr_getf_prot(&Sim_NAV2_DME);
+    State_New.pitot1_fail = dr_geti(&Sim_Pitot1_Fail);
+    State_New.pitot2_fail = dr_geti(&Sim_Pitot2_Fail);
+    State_New.static1_fail = dr_geti(&Sim_Static1_Fail);
+    State_New.static2_fail = dr_geti(&Sim_Static2_Fail);
 }
 
 void MakeDataRefs()
@@ -67,17 +82,24 @@ void MakeDataRefs()
 
     for (int i = 0; i < NUM_IRU; i++)
     {
-        
+        //DME Position datarefs
+        for(int j = 0; j < 9; j++)
+        {
+            DCR_CREATE_VF64(NULL, (double *) &IRU[i].dme_pos[j], 3, true, "omi/iru/%d/dme-%d_pos", i, j);
+        } 
         
         DCR_CREATE_I(NULL, &IRU[i].nav_mode, true, "omi/iru/%d/mode", i);
         DCR_CREATE_I(NULL, &IRU[i].power_on, true, "omi/iru/%d/power", i);
         DCR_CREATE_I(NULL, &IRU[i].mix_switch, true, "omi/iru/%d/triple_mix_switch", i);
+        DCR_CREATE_I(NULL, &IRU[i].waypoint_selector, true, "omi/iru/%d/waypoint_selector", i);
 
         DCR_CREATE_F64(NULL, &IRU[i].batt_capacity_sec, true, "omi/iru/%d/battery_secs", i);
         DCR_CREATE_F64(NULL, &IRU[i].drift_angle, true, "omi/iru/%d/drift_angle", i);
         DCR_CREATE_F64(NULL, &IRU[i].tas, true, "omi/iru/%d/tas", i);
         DCR_CREATE_F64(NULL, &IRU[i].heading_true,true,"omi/iru/%d/heading", i);
         DCR_CREATE_F64(NULL, &IRU[i].time_in_nav,true,"omi/iru/%d/time_in_nav", i);
+        DCR_CREATE_F64(NULL, &IRU[i].dme1_dist_comp, true, "omi/iru/%d/dme1_dist_comp", i);
+        DCR_CREATE_F64(NULL, &IRU[i].dme2_dist_comp, true, "omi/iru/%d/dme2_dist_comp", i);
 
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].current_pos, 2, true, "omi/iru/%d/iru_pos", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].align_pos, 2, true, "omi/iru/%d/align_pos", i);
@@ -92,29 +114,6 @@ void MakeDataRefs()
 
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_pos, 2, true, "omi/iru/%d/triple_pos",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_vect, 2, true, "omi/iru/%d/triple_vel_en",i);
-        DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_mix_vel, 2,  true, "omi/iru/%d/triple_vel_vect", i);
-
-        /*
-        *DCR_CREATE_F64(NULL, &IRU[i].current_pos.lat, true, "omi/iru/%d/iru_pos_lat", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].current_pos.lon, true, "omi/iru/%d/iru_pos_lon", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].align_pos.lat, true, "omi/iru/%d/align_lat", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].align_pos.lon, true, "omi/iru/%d/align_lon", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].velocity_vect.x, true, "omi/iru/%d/velocity_n", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].velocity_vect.y, true, "omi/iru/%d/velocity_e", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].polar_vel.x, true, "omi/iru/%d/iru_psi", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].polar_vel.y, true, "omi/iru/%d/iru_vel", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].pos_drift_vect.x, true, "omi/iru/%d/pos_drift_n", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].pos_drift_vect.y, true, "omi/iru/%d/pos_drift_e", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].polar_pos_drift.x, true, "omi/iru/%d/pos_drift_psi", i);
-        *DCR_CREATE_F64(NULL, &IRU[i].polar_pos_drift.y, true, "omi/iru/%d/pos_drift_vel", i);
-        *DCR_CREATE_F64(NULL, &Triple_Mix_Pos.curr_pos.lat, true, "omi/iru/%d/triple_mix_pos_lat", i);
-        *DCR_CREATE_F64(NULL, &Triple_Mix_Pos.curr_pos.lon, true, "omi/iru/%d/triple_mix_pos_lon", i);
-        *DCR_CREATE_F64(NULL, &Triple_Mix_Pos.velocity_vect.x, true, "omi/iru/%d/triple_mix_vel_n", i);
-        *DCR_CREATE_F64(NULL, &Triple_Mix_Pos.velocity_vect.y, true, "omi/iru/%d/triple_mix_vel_e", i);
-        *DCR_CREATE_F64(NULL, &Triple_Mix_Pos.polar_vel_vect.x, true, "omi/iru/%d/triple_mix_psi", i);
-        *DCR_CREATE_F64(NULL, &Triple_Mix_Pos.polar_vel_vect.y, true, "omi/iru/%d/triple_mix_spd", i);
-        */     
-    
-        
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_mix_vel, 2,  true, "omi/iru/%d/triple_vel_vect", i);  
     }
 }
