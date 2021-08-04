@@ -2,5 +2,14 @@
 #define __NAVSYSTEM_H__
 
 #include "sources.h"
+#include "structs.h"
+#include "GeographicLib.h"
+
+void current_leg_compute(int i);
+
+void leg_compute(int i, int from, int to);
+
+void leg_switch(int i);
+
 
 #endif

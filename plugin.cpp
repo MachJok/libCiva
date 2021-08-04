@@ -9,7 +9,7 @@
 #include "functions.h"
 #include "structs.h"
 #include "variables.h"
-
+#include "navsystem.h"
 
 #if IBM
     #include <windows.h>
@@ -96,7 +96,7 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
         for(int i = 0; i < NUM_IRU; ++i)
         {   
 
-            if(IRU[i].nav_mode > 2)
+            if(IRU[i].nav_mode > 2 && IRU[i].batt_capacity_sec > 0)
             {
                 timer_start = true;
                 if(timer_start && old_timer == timer_start)
@@ -105,10 +105,12 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
                     timer_start = false;
                     old_timer = false;
                 }
+                wpt_deg_min(i);
+                current_leg_compute(i);
                 current_pos_update(i);
-                waypoint_selector_clamp(i);
-
+                leg_switch(i);
             }
+            waypoint_selector_clamp(i);
         }
 
         if(first_floop)

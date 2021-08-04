@@ -26,9 +26,9 @@ geo_pos3_t old_pos{0}, mix_pos{0};
 vect3_t ecef_pos_[NUM_IRU + 1]{0}, nav_pos_ecef{0}, mix_pos_ecef{0};
 bool adc1_valid{0};
 bool adc0_valid{0};
+bool try_again{true};
 bool triple_mix_on{false};
 double mix_weight{0};
-
 bool drift = true;
 char output[32] = {0};
 
@@ -42,12 +42,15 @@ void set_drift_vector()
         std::mt19937 gen(rd());
         for(int i = 0; i<NUM_IRU; ++i)
         {
-            //normal dist centered on 0
-            std::normal_distribution<double> normal_dist(1.35, 0.41994);
-            drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
-            if(drift_mag < 0)
+            //normal dist centered on 0, 1.35, 0.41994
+            std::normal_distribution<double> normal_dist(0.57, 0.39);
+            if(try_again)
             {
-                drift_mag = -drift_mag;
+                drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
+                if(drift_mag < 0.1)
+                {
+                    try_again = true;
+                }
             }
             std::mt19937 gen2(rd());
             std::uniform_real_distribution<double> uniform_dist(0, 360);
@@ -158,13 +161,10 @@ void wind_vect_update(int i)
     if(IRU[i].tas > min_spd )
     {
         //gnd vector - flight vector
-        vect2_t wind_vector = vect2_sub(IRU[i].flight_vect, 
+        IRU[i].wind_vect = vect2_sub(IRU[i].flight_vect, 
                                         IRU[i].velocity_vect);
-        IRU[i].polar_wind_vect = {floor(normalize_hdg(dir2hdg(wind_vector))), 
-                                    round(MPS2KT(vect2_abs(wind_vector)))};
-        //{normalize_hdg(dir2hdg(wind_vector)) + 180, vect2_abs(wind_vector)};
-        // IRU[i].polar_wind_vect.x = (normalize_hdg(dir2hdg(wind_vector)));
-        // IRU[i].polar_wind_vect.y = (vect2_abs(wind_vector));
+        IRU[i].polar_wind_vect = {floor(normalize_hdg(dir2hdg(IRU[i].wind_vect))), 
+                                    round(MPS2KT(vect2_abs(IRU[i].wind_vect)))};
         FILTER_IN_LIN(IRU[i].drift_angle, IRU[i].polar_flight_vel.x - 
                         IRU[i].polar_ground_vel.x, State_New.frame_time, 30);
     }
@@ -224,10 +224,11 @@ void current_pos_update(int i)
     if(NUM_IRU > 2 && (IRU[i].mix_switch && IRU[i].nav_mode == 3))
     {    
         triple_mix();
-        ecef_convert_geo_pos3(IRU[i].nav_pos, nav_pos_ecef);
-        ecef_convert_geo_pos3(IRU[i].mix_pos, mix_pos_ecef);
+        nav_pos_ecef = geo2ecef_mtr(IRU[i].nav_pos, &wgs84);
 
-        FILTER_IN(mix_weight, 1, State_New.frame_time, 120 / State_New.frame_time);
+        mix_pos_ecef = geo2ecef_mtr(IRU[i].mix_pos, &wgs84);
+
+        FILTER_IN(mix_weight, 1, State_New.frame_time, 30);
         vect3_t new_nav_pos;
 
         new_nav_pos.x = wavg(nav_pos_ecef.x, mix_pos_ecef.x, mix_weight);
@@ -235,23 +236,17 @@ void current_pos_update(int i)
         new_nav_pos.z = wavg(nav_pos_ecef.z, mix_pos_ecef.z, mix_weight);
 
         IRU[i].nav_pos = ecef2geo(new_nav_pos, &wgs84);
+        deg_min(IRU[i].nav_pos.lat, IRU[i].nav_pos.lon, IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm));
     }
-    else if(NUM_IRU < 3 && (!IRU[i].mix_switch && IRU[i].nav_mode != 3))
+    else if(NUM_IRU < 3 || (!IRU[i].mix_switch || IRU[i].nav_mode != 3))
     {
         triple_mix_on = false;
         IRU[i].nav_pos = IRU[i].current_pos;
+        deg_min(IRU[i].nav_pos.lat, IRU[i].nav_pos.lon, IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm));
     }
+    
+    IRU[i].flightplan.waypoint_pos[0] = {IRU[i].nav_pos.lat, IRU[i].nav_pos.lon};
 
-}
-
-void ecef_convert_geo_pos2(geo_pos2_t pos, vect3_t &ecef_pos)
-{
-    ecef.Forward(pos.lat, pos.lon, 0, ecef_pos.x, ecef_pos.y, ecef_pos.z);
-}
-
-void ecef_convert_geo_pos3(geo_pos3_t pos, vect3_t &ecef_pos)
-{
-    ecef.Forward(pos.lat, pos.lon, pos.elev, ecef_pos.x, ecef_pos.y, ecef_pos.z);
 }
 
 void triple_mix()
@@ -271,10 +266,12 @@ void triple_mix()
     geo_pos3_t max_pos;
     geo_pos3_t min_pos;
     max_pos = {max_lat, max_lon, elev};
-    max_pos = {min_lat, min_lon, elev};
+    min_pos = {min_lat, min_lon, elev};
     vect3_t max_ecef, min_ecef, mid_ecef;
-    ecef_convert_geo_pos3(max_pos, max_ecef);
-    ecef_convert_geo_pos3(min_pos, min_ecef);
+    
+    max_ecef = geo2ecef_mtr(max_pos, &wgs84);
+    min_ecef = geo2ecef_mtr(min_pos, &wgs84);
+
     mid_ecef = {(max_ecef.x + min_ecef.x) / 2., (max_ecef.y + min_ecef.y) / 2.,
                  (max_ecef.z + min_ecef.z) / 2.};
     mix_pos = ecef2geo(mid_ecef, &wgs84);
@@ -303,24 +300,22 @@ void triple_mix()
 
 void electrical_source()
 {
+    int n = sizeof(State_New.eng_gen_on) / sizeof(State_New.eng_gen_on[0]);
+    int num_gens = std::count(State_New.eng_gen_on, State_New.eng_gen_on + n, 1);
     for(int i = 0; i < NUM_IRU; ++i)
     {
-        for(int j = 0; j < sizeof(State_New.eng_gen_on); ++j)
+        if(!State_New.apu_gen_on && num_gens < 1 && IRU[i].nav_mode > 0)
         {
-            if ((!State_New.apu_gen_on && !State_New.eng_gen_on[j]) && 
-                IRU[i].nav_mode > 0) 
-            {
-                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, 
-                                State_New.frame_time, 1);
-                IRU[i].power_on = 0;
-            }
-            else if(IRU[i].batt_capacity_sec <= 900 && 
-                    (State_New.apu_gen_on || State_New.eng_gen_on[j]))
-            {
-                FILTER_IN_LIN(IRU[i].batt_capacity_sec, 900, 
-                                State_New.frame_time, .5);
-                IRU[i].power_on = 1;
-            }
+            FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, State_New.frame_time, 1);
+            IRU[i].power_on = 0;//CHANGE THIS TO BE CONTROLED BY BATT AND GENERATOR POWER
+            IRU[i].batt_light = !IRU[i].power_on;
+        }
+
+        if(IRU[i].batt_capacity_sec < 900 && num_gens >= 1)
+        {   
+            FILTER_IN_LIN(IRU[i].batt_capacity_sec, 900, State_New.frame_time, 1);
+            IRU[i].power_on = 1;
+            IRU[i].batt_light = !IRU[i].power_on;           
         }
     }
 
@@ -352,3 +347,20 @@ void waypoint_selector_clamp(int i)
     }
 }
 
+double wgs84_rad(double lat_deg)
+{
+    double sin_lat = sin(DEG2RAD(lat_deg));
+    double radius = wgs84.a / sqrt(1 - wgs84.ecc2 * POW2(sin_lat));
+    return radius;
+}
+
+void wpt_deg_min(int i)
+{
+    geo_pos2_t pos;
+    int wpt_num;
+
+    wpt_num = IRU[i].waypoint_selector;
+    pos = IRU[i].flightplan.waypoint_pos[wpt_num];
+
+    deg_min(pos.lat, pos.lon, IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm));
+}

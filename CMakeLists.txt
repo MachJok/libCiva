@@ -17,6 +17,7 @@ set(SRC
 	plugin.cpp
 	structs.cpp
 	dme_functions.cpp
+	navsystem.cpp
 	)
 set(HDR
     datarefs.h
@@ -25,7 +26,8 @@ set(HDR
 	sources.h
 	structs.h
 	variables.h
-	dme_functions.h)
+	dme_functions.h
+	navsystem.h)
 # To recall a variable use ${VARNAME}
 set(ALL_SRC ${SRC} ${HDR})
 

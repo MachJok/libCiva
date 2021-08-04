@@ -31,7 +31,7 @@ static dr_t Sim_Pitot1_Fail;
 static dr_t Sim_Pitot2_Fail;
 static dr_t Sim_Static1_Fail;
 static dr_t Sim_Static2_Fail;
-
+static dr_t Sim_Num_Gens;
 //function loads required datarefs
 void LoadDataRefs();
 //get function for datarefs
