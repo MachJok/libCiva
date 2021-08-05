@@ -21,13 +21,17 @@ void current_leg_compute(int i)
         IRU[i].flightplan.curr_leg_dist = gc_distance(npos, end);
         IRU[i].flightplan.curr_leg_crs = gc_point_hdg(start, end);
 
-        IRU[i].cross_track_err = crosstrack_dist(start, end, npos);
+        IRU[i].flightplan.time_to_fix = IRU[i].flightplan.curr_leg_dist / IRU[i].polar_ground_vel.y;
+
+        IRU[i].cross_track_err = crosstrack_dist(GEO2_TO_GEO3(start, 0), GEO2_TO_GEO3(end, 0), IRU[i].nav_pos);
         // const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
         // vect2_t ppos_proj = geo2fpp(npos, &proj);
         // IRU[i].cross_track_err = ppos_proj.x;
         if(IRU[i].polar_flight_vel.y > 115)
         {
-            IRU[i].track_ang_err = fmod(IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x,360);
+            IRU[i].track_ang_err = (IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x) < 0 ? 
+                                360 - (IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x) :
+                                (IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x);
         }
         else
         {
@@ -53,9 +57,14 @@ void leg_compute(int i, int from, int to)
         end = IRU[i].flightplan.waypoint_pos[to];
         IRU[i].flightplan.sel_leg_dist = gc_distance(start, end);
         IRU[i].flightplan.sel_leg_crs = gc_point_hdg(start, end);
-        const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
-        vect2_t ppos_proj = geo2fpp(ppos, &proj);
-        IRU[i].cross_track_err = ppos_proj.x;
+
+        IRU[i].flightplan.time_to_fix = IRU[i].flightplan.sel_leg_dist / IRU[i].polar_ground_vel.y;
+
+        IRU[i].cross_track_err = crosstrack_dist(GEO2_TO_GEO3(start, 0), GEO2_TO_GEO3(end, 0), IRU[i].nav_pos);
+
+        // const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
+        // vect2_t ppos_proj = geo2fpp(ppos, &proj);
+        // IRU[i].cross_track_err = ppos_proj.x;
     }
     else
     {
@@ -92,12 +101,12 @@ void leg_switch(int i)
 
     if (IRU[i].flightplan.curr_leg_dist < distance && !IRU[i].leg_switch && IRU[i].auto_man_switch)
     {
-        IRU[i].leg_switch = 1;
+        IRU[i].leg_switch = true;
         ++IRU[i].flightplan.leg.from;
         ++IRU[i].flightplan.leg.to;        
     }
-    else 
+    else if(IRU[i].leg_switch)
     {
-        IRU[i].leg_switch = 0;
+        IRU[i].leg_switch = false;
     }
 }
