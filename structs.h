@@ -22,6 +22,7 @@ struct flightplan_t
     double sel_leg_crs;
     double curr_leg_hdg;
     double next_leg_hdg;
+    double time_to_fix;
 };
 
 struct dme_info_t
@@ -44,6 +45,7 @@ struct IRU_t
     int waypoint_selector;
     int auto_man_switch;
     int leg_switch;
+    int warn_light;
 
     flightplan_t flightplan;
 

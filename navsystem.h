@@ -4,6 +4,7 @@
 #include "sources.h"
 #include "structs.h"
 #include "GeographicLib.h"
+#include "functions.h"
 
 void current_leg_compute(int i);
 

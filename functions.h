@@ -51,4 +51,6 @@ void deg_min(double lat, double lon, char* output, size_t cap);
 void waypoint_selector_clamp(int i);
 
 void wpt_deg_min(int i);
+
+double crosstrack_dist(geo_pos2_t wpt1, geo_pos2_t wpt2, geo_pos2_t nav_pos);
 #endif

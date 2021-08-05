@@ -26,7 +26,6 @@ geo_pos3_t old_pos{0}, mix_pos{0};
 vect3_t ecef_pos_[NUM_IRU + 1]{0}, nav_pos_ecef{0}, mix_pos_ecef{0};
 bool adc1_valid{0};
 bool adc0_valid{0};
-bool try_again{true};
 bool triple_mix_on{false};
 double mix_weight{0};
 bool drift = true;
@@ -44,19 +43,21 @@ void set_drift_vector()
         {
             //normal dist centered on 0, 1.35, 0.41994
             std::normal_distribution<double> normal_dist(0.57, 0.39);
-            if(try_again)
-            {
-                drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
-                if(drift_mag < 0.1)
-                {
-                    try_again = true;
-                }
-            }
+
+            drift_mag = KT2MPS(normal_dist(gen)); //converts nm/hr to m/s
+
             std::mt19937 gen2(rd());
             std::uniform_real_distribution<double> uniform_dist(0, 360);
             double drift_dir = uniform_dist(gen2);
+            if(drift_mag < 0)
+            {
+                drift_dir = normalize_hdg(drift_dir + 180);
+                drift_mag = -drift_mag;
+            }            
             IRU[i].pos_drift_vect = vect2_scmul(hdg2dir(drift_dir), drift_mag);
             IRU[i].polar_pos_drift = {drift_dir, drift_mag};
+
+
 
             ASSERT(!isnan(IRU[i].pos_drift_vect.x));
             ASSERT(!isnan(IRU[i].pos_drift_vect.y));
@@ -165,8 +166,15 @@ void wind_vect_update(int i)
                                         IRU[i].velocity_vect);
         IRU[i].polar_wind_vect = {floor(normalize_hdg(dir2hdg(IRU[i].wind_vect))), 
                                     round(MPS2KT(vect2_abs(IRU[i].wind_vect)))};
-        FILTER_IN_LIN(IRU[i].drift_angle, IRU[i].polar_flight_vel.x - 
-                        IRU[i].polar_ground_vel.x, State_New.frame_time, 30);
+        if(IRU[i].polar_wind_vect.y > 0)
+        {
+            FILTER_IN_LIN(IRU[i].drift_angle, IRU[i].polar_flight_vel.x - 
+                        IRU[i].polar_ground_vel.x, State_New.frame_time, 1);
+        }
+        else
+        {
+            IRU[i].polar_wind_vect = {0};
+        }
     }
 
     else
@@ -363,4 +371,14 @@ void wpt_deg_min(int i)
     pos = IRU[i].flightplan.waypoint_pos[wpt_num];
 
     deg_min(pos.lat, pos.lon, IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm));
+}
+
+double crosstrack_dist(geo_pos2_t wpt1, geo_pos2_t wpt2, geo_pos2_t nav_pos)
+{
+    double dist_13, dist_12;
+    geo_pos2_t p1, p2, p0;
+    p1 = GEO3_TO_GEO2(wpt1);
+    p2 = GEO3_TO_GEO2(wpt2);
+    p0 = GEO3_TO_GEO2(nav_pos);
+    return asin(sin(gc_distance(wpt1, nav_pos)) * sin(gc_point_hdg(wpt1, nav_pos)-gc_point_hdg(wpt1, wpt2)));
 }

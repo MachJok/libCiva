@@ -5,6 +5,7 @@
 #include "datarefs.h"
 #include "structs.h"
 #include "variables.h"
+#include <cmath>
 
 void current_leg_compute(int i)
 {
@@ -14,17 +15,19 @@ void current_leg_compute(int i)
         int from, to;
         from = IRU[i].flightplan.leg.from;
         to = IRU[i].flightplan.leg.to;
-        npos = {IRU[i].nav_pos.lat, IRU[i].nav_pos.lon};
+        npos = GEO3_TO_GEO2(IRU[i].nav_pos);
         start = IRU[i].flightplan.waypoint_pos[from];
         end = IRU[i].flightplan.waypoint_pos[to];
-        IRU[i].flightplan.curr_leg_dist = gc_distance(start, end);
+        IRU[i].flightplan.curr_leg_dist = gc_distance(npos, end);
         IRU[i].flightplan.curr_leg_crs = gc_point_hdg(start, end);
-        const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
-        vect2_t ppos_proj = geo2fpp(npos, &proj);
-        IRU[i].cross_track_err = ppos_proj.x;
+
+        IRU[i].cross_track_err = crosstrack_dist(start, end, npos);
+        // const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
+        // vect2_t ppos_proj = geo2fpp(npos, &proj);
+        // IRU[i].cross_track_err = ppos_proj.x;
         if(IRU[i].polar_flight_vel.y > 115)
         {
-            IRU[i].track_ang_err = IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x;
+            IRU[i].track_ang_err = fmod(IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x,360);
         }
         else
         {
@@ -48,8 +51,8 @@ void leg_compute(int i, int from, int to)
         ppos = GEO3_TO_GEO2(IRU[i].nav_pos);
         start = IRU[i].flightplan.waypoint_pos[from];
         end = IRU[i].flightplan.waypoint_pos[to];
-        IRU[i].flightplan.curr_leg_dist = gc_distance(start, end);
-        IRU[i].flightplan.curr_leg_crs = gc_point_hdg(start, end);
+        IRU[i].flightplan.sel_leg_dist = gc_distance(start, end);
+        IRU[i].flightplan.sel_leg_crs = gc_point_hdg(start, end);
         const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
         vect2_t ppos_proj = geo2fpp(ppos, &proj);
         IRU[i].cross_track_err = ppos_proj.x;
@@ -87,7 +90,7 @@ void leg_switch(int i)
     radius = (gs1 * gs2) / (EARTH_GRAVITY * tan(DEG2RAD(25)));
     distance = radius * tan(DEG2RAD(delta_hdg)/2);
 
-    if (IRU[i].flightplan.curr_leg_dist < distance && !IRU[i].leg_switch)
+    if (IRU[i].flightplan.curr_leg_dist < distance && !IRU[i].leg_switch && IRU[i].auto_man_switch)
     {
         IRU[i].leg_switch = 1;
         ++IRU[i].flightplan.leg.from;

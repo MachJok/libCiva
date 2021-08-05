@@ -107,7 +107,11 @@ void MakeDataRefs()
         DCR_CREATE_F64(NULL, &IRU[i].current_pos.elev, true, "omi/iru/%d/iru_alt", i);
         DCR_CREATE_F64(NULL, &IRU[i].flightplan.curr_leg_dist, true, "omi/iru/%d/nav/wpt_dist", i);
         DCR_CREATE_F64(NULL, &IRU[i].flightplan.curr_leg_crs, true, "omi/iru/%d/nav/dsrtk", i);
+        DCR_CREATE_F64(NULL, &IRU[i].flightplan.sel_leg_dist, true, "omi/iru/%d/nav/sel_leg_dist", i);
+        DCR_CREATE_F64(NULL, &IRU[i].flightplan.sel_leg_crs, true, "omi/iru/%d/nav/sel_leg_dsrtk", i);        
         DCR_CREATE_F64(NULL, &IRU[i].track_ang_err, true, "omi/iru/%d/nav/tke", i);
+        DCR_CREATE_F64(NULL, &IRU[i].cross_track_err, true, "omi/iru/%d/nav/xte", i);
+        
 
         DCR_CREATE_VI(NULL, (int *) &IRU[i].flightplan.leg, 2, true, "omi/iru/%d/nav/leg_frm_to", i);
 
@@ -121,12 +125,12 @@ void MakeDataRefs()
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_ground_vel, 2, true, "omi/iru/%d/ground_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_flight_vel, 2, true, "omi/iru/%d/flight_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_wind_vect, 2, true, "omi/iru/%d/wind_vect",i);
-        for(int j = 1; j < 9; ++j)
+        for(int j = 1; j < 10; ++j)
         {
             DCR_CREATE_VF64(NULL, (double *) &IRU[i].flightplan.waypoint_pos[j], 2, true, "omi/iru/%d/nav/waypoint%d", i, j);
             
         }
-        DCR_CREATE_B(NULL, &IRU[i].waypoint_dm, sizeof(&IRU[i].waypoint_dm), true, "omi/iru/%d/nav/waypoint_dm", i);
+        DCR_CREATE_B(NULL, &IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm), true, "omi/iru/%d/nav/waypoint_dm", i);
         DCR_CREATE_B(NULL, &IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
 
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_pos, 2, true, "omi/iru/%d/triple_pos",i);
