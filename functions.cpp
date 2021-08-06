@@ -1,5 +1,4 @@
 #include "functions.h"
-#include "Geodesic.hpp"
 #include "acfutils/geom.h"
 #include "acfutils/assert.h"
 #include "acfutils/helpers.h"
@@ -54,6 +53,7 @@ void set_drift_vector()
                 drift_dir = normalize_hdg(drift_dir + 180);
                 drift_mag = -drift_mag;
             }            
+            //vel E and N
             IRU[i].pos_drift_vect = vect2_scmul(hdg2dir(drift_dir), drift_mag);
             IRU[i].polar_pos_drift = {drift_dir, drift_mag};
 
@@ -96,13 +96,14 @@ void iru_init()
         IRU[i].batt_capacity_sec = 900;
         IRU[i].current_pos.elev = 0;
         IRU[i].align_pos.elev = 0;
+        IRU[i].flightplan.leg.to = 1;
         
-        logMsg("IRU-%i Drift Vector: (%03f, %03f)", i+1, 
+        logMsg("IRU-%i Drift Vector: (%03f m/s E, %03f m/s N)", i+1, 
                                         IRU[i].pos_drift_vect.x, 
                                         IRU[i].pos_drift_vect.y);
         logMsg("IRU-%i init True Heading: %f", i+1, IRU[i].heading_true);
     }
-    logMsg("IRU INIT COMPLETE: ");
+    logMsg("IRU INIT COMPLETE");
 }
 //computes the actual N and E velocities of the aircraft in the sim to compute IRU velocity vectors m/s
 //simulates accelerometer integration for velocity
@@ -116,13 +117,8 @@ void set_velocity_vect(int i)
     // IRU[i].polar_ground_vel.x = normalize_hdg(dir2hdg(IRU[i].velocity_vect));
     // IRU[i].polar_ground_vel.y = vect2_abs(IRU[i].velocity_vect) / State_New.frame_time;
     // IRU[i].polar_flight_vel = {IRU[i].heading_true, IRU[i].tas};
-    double hdg = IRU[i].heading_true;
-    double tas = IRU[i].tas;
-    IRU[i].flight_vect = vect2_scmul(hdg2dir(hdg), tas);
-    IRU[i].polar_flight_vel.x = hdg;
-    IRU[i].polar_flight_vel.y = tas;
-    IRU[i].polar_ground_vel.x = dir2hdg(IRU[i].velocity_vect);
-    IRU[i].polar_ground_vel.y = vect2_abs(IRU[i].velocity_vect);
+
+    IRU[i].polar_ground_vel = {dir2hdg(IRU[i].velocity_vect), vect2_abs(IRU[i].velocity_vect)};
 
 }
 
@@ -154,12 +150,7 @@ void true_heading_update(int i)
 
 void wind_vect_update(int i)
 {
-    
-   double min_spd = KT2MPS(115);
-
-
-
-    if(IRU[i].tas > min_spd )
+    if(IRU[i].tas > MIN_SPD )
     {
         //gnd vector - flight vector
         IRU[i].wind_vect = vect2_sub(IRU[i].flight_vect, 
@@ -189,39 +180,28 @@ void current_pos_update(int i)
     true_heading_update(i);
     wind_vect_update(i);
 
-    //compute distance travelled in 1 frame and direction
-    //MAKE NEW FUNCTION since velocities are now MAG-N/MAG-E not DIR/MAG
-
     IRU[i].time_in_nav = State_New.runtime - nav_start_time;
 
-
-    double az = IRU[i].polar_ground_vel.x;
-    double dist = vect2_abs(IRU[i].velocity_vect) * State_New.frame_time;
-
     //recompute current IRU position always
-    geod.Direct(IRU[i].current_pos.lat, IRU[i].current_pos.lon, az, dist, IRU[i].current_pos.lat, 
-                IRU[i].current_pos.lon);
+    geo_pos2_t new_pos, ppos;
+    ppos = GEO3_TO_GEO2(IRU[i].current_pos);
+           //geo_displace(*ellip,  pos, hdg, dist)
+    double az = IRU[i].polar_ground_vel.x;
+    double dist = IRU[i].polar_ground_vel.y * State_New.frame_time;
+
+    geod.Direct(ppos.lat, ppos.lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
+    // new_pos = geo_displace(&wgs84, ppos, az, dist);
+    // IRU[i].current_pos = {new_pos.lat, new_pos.lon, IRU[i].current_pos.elev};
+
     deg_min(IRU[i].current_pos.lat, IRU[i].current_pos.lon, IRU[i].curr_pos_dm,
              sizeof(IRU[i].curr_pos_dm));
-
     
-    //Altitude and TAS input into IRU. ADC1 -> IRU1/3, ADC 2 -> IRU2
-    for(int i = 0; i < NUM_IRU; ++i)
-    {
-        if(i == 2 && IRU[i].nav_mode == 3)
-        {
-            IRU[i].adc1_alt = FEET2MET(State_New.alt_ft_[0]);
-            IRU[i].tas = KT2MPS(State_New.tas_kt_[0]);
-        }
-        else if(IRU[i].nav_mode == 3)
-        {
-            IRU[i].adc2_alt = FEET2MET(State_New.alt_ft_[i]);
-            IRU[i].tas = KT2MPS(State_New.tas_kt_[i]);
-        }
-        //integrate each frame vertical speed to compute altitude
-        IRU[i].current_pos.elev += FEET2MET(State_New.vh_ind_fpm2) * State_New.frame_time;
-    }
+    IRU[i].flightplan.waypoint_pos[0] = {IRU[i].nav_pos.lat, IRU[i].nav_pos.lon};
 
+}
+
+void triple_mix_logic(int i)
+{
     if(!IRU[i].mix_switch || IRU[i].nav_mode != 3 || NUM_IRU < 3)
     {
         IRU[i].mix_pos = {0};
@@ -251,12 +231,30 @@ void current_pos_update(int i)
         triple_mix_on = false;
         IRU[i].nav_pos = IRU[i].current_pos;
         deg_min(IRU[i].nav_pos.lat, IRU[i].nav_pos.lon, IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm));
-    }
-    
-    IRU[i].flightplan.waypoint_pos[0] = {IRU[i].nav_pos.lat, IRU[i].nav_pos.lon};
-
+    }    
 }
 
+void adc_data_in(int i)
+{
+    double hdg = IRU[i].heading_true;
+    double tas = IRU[i].tas;
+    IRU[i].flight_vect = vect2_scmul(hdg2dir(hdg), tas);
+    IRU[i].polar_flight_vel = {hdg, tas};
+
+    if(i == 2 && IRU[i].nav_mode == 3)
+    {
+        IRU[i].adc1_alt = FEET2MET(State_New.alt_ft_[0]);
+        IRU[i].tas = KT2MPS(State_New.tas_kt_[0]);
+    }
+    else if(IRU[i].nav_mode == 3)
+    {
+        IRU[i].adc2_alt = FEET2MET(State_New.alt_ft_[i]);
+        IRU[i].tas = KT2MPS(State_New.tas_kt_[i]);
+    }
+    //integrate each frame vertical speed to compute altitude
+    IRU[i].current_pos.elev += FEET2MET(State_New.vh_ind_fpm2) * State_New.frame_time;
+  
+}
 void triple_mix()
 {    
     double max_lat, max_lon, min_lat, min_lon, elev;
@@ -296,8 +294,10 @@ void triple_mix()
         az = {};
         dist = {};
         // IN:lat1, lon1, lat2, lon2 out: dist, az12, az21
-        geod.Inverse(old_pos.lat, old_pos.lon, IRU[i].mix_pos.lat, 
-                    IRU[i].mix_pos.lon, dist, az, trash_val);
+        dist = gc_distance(GEO3_TO_GEO2(old_pos), GEO3_TO_GEO2(IRU[i].mix_pos));
+        az = gc_point_hdg(GEO3_TO_GEO2(old_pos), GEO3_TO_GEO2(IRU[i].mix_pos));
+        //geod.Inverse(old_pos.lat, old_pos.lon, IRU[i].mix_pos.lat, 
+        //            IRU[i].mix_pos.lon, dist, az, trash_val);
         IRU[i].polar_mix_vel = {normalize_hdg(az), dist / State_New.frame_time};
         IRU[i].mix_vect = {vect2_scmul(hdg2dir(az), 
                             dist / State_New.frame_time)};
@@ -393,4 +393,9 @@ double crosstrack_dist(geo_pos3_t wpt1, geo_pos3_t wpt2, geo_pos3_t nav_pos)
     // p2 = GEO3_TO_GEO2(wpt2);
     // p0 = GEO3_TO_GEO2(nav_pos);
     // return asin(sin(gc_distance(wpt1, nav_pos)) * sin(gc_point_hdg(wpt1, nav_pos)-gc_point_hdg(p1,p2)));
+}
+//work on the remote transfer function
+void remote_transfer()
+{
+    
 }

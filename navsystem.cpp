@@ -7,6 +7,8 @@
 #include "variables.h"
 #include <cmath>
 
+bool stored_0{false};
+
 void current_leg_compute(int i)
 {
     if(IRU[i].flightplan.leg.from != IRU[i].flightplan.leg.to)
@@ -16,10 +18,19 @@ void current_leg_compute(int i)
         from = IRU[i].flightplan.leg.from;
         to = IRU[i].flightplan.leg.to;
         npos = GEO3_TO_GEO2(IRU[i].nav_pos);
-        start = IRU[i].flightplan.waypoint_pos[from];
+        if(from == 0 && !stored_0)
+        {
+            start = IRU[i].flightplan.waypoint_pos[from];
+            stored_0 = true;
+        }
+        else
+        {
+            start = IRU[i].flightplan.waypoint_pos[from];
+            stored_0 = false;
+        }
         end = IRU[i].flightplan.waypoint_pos[to];
         IRU[i].flightplan.curr_leg_dist = gc_distance(npos, end);
-        IRU[i].flightplan.curr_leg_crs = gc_point_hdg(start, end);
+        IRU[i].flightplan.curr_leg_crs = isnan(gc_point_hdg(start, end)) ? 0 : gc_point_hdg(start, end);
 
         IRU[i].flightplan.time_to_fix = IRU[i].flightplan.curr_leg_dist / IRU[i].polar_ground_vel.y;
 
@@ -27,11 +38,19 @@ void current_leg_compute(int i)
         // const fpp_t proj = ortho_fpp_init(end, IRU[i].flightplan.curr_leg_crs, &wgs84, false);
         // vect2_t ppos_proj = geo2fpp(npos, &proj);
         // IRU[i].cross_track_err = ppos_proj.x;
-        if(IRU[i].polar_flight_vel.y > 115)
+        if(IRU[i].polar_flight_vel.y > MIN_SPD)
         {
-            IRU[i].track_ang_err = (IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x) < 0 ? 
-                                360 - (IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x) :
-                                (IRU[i].flightplan.curr_leg_crs - IRU[i].polar_ground_vel.x);
+            vect3_t gnd_vect = VECT2_TO_VECT3(IRU[i].velocity_vect, 0);
+            vect2_t fp_polar = {IRU[i].flightplan.curr_leg_crs, IRU[i].polar_ground_vel.y};
+            vect3_t fp_vect = {vect2_scmul(hdg2dir(fp_polar.x),fp_polar.y).x, 
+                               vect2_scmul(hdg2dir(fp_polar.x),fp_polar.y).y, 0};
+
+            double error = RAD2DEG(acos(vect3_dotprod(gnd_vect, fp_vect) / 
+                                   (vect3_abs(fp_vect) * vect3_abs(gnd_vect))));
+            vect3_t sign_vect = vect3_xprod(gnd_vect, fp_vect);
+            int sign = sign_vect.z > 0 ? 1 : -1;
+            IRU[i].track_ang_err = sign * error;                              
+
         }
         else
         {

@@ -105,9 +105,11 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
                     timer_start = false;
                     old_timer = false;
                 }
+                adc_data_in(i);                
+                current_pos_update(i);
+                triple_mix_logic(i);
                 wpt_deg_min(i);
                 current_leg_compute(i);
-                current_pos_update(i);
                 leg_switch(i);
             }
             waypoint_selector_clamp(i);

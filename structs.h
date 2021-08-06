@@ -44,7 +44,7 @@ struct IRU_t
     int batt_light; //battery light
     int waypoint_selector;
     int auto_man_switch;
-    int leg_switch;
+    bool leg_switch;
     int warn_light;
 
     flightplan_t flightplan;

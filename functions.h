@@ -45,6 +45,9 @@ void debug_set_pos();
 
 //converts sim position to deg minute format
 // void sim_pos_deg_min();
+void adc_data_in(int i);
+
+void triple_mix_logic(int i);
 
 void deg_min(double lat, double lon, char* output, size_t cap);
 

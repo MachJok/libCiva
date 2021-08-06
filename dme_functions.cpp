@@ -38,12 +38,17 @@ void iru_dme_pos_corr_comp(int i)
         
         //compute the direction and ground distance between the current pos
         //and the entered dme station coordinates
-        geod.Inverse(IRU[i].current_pos.lat, IRU[i].current_pos.lon, 
-                     IRU[i].dme_pos[0].lat, IRU[i].dme_pos[0].lon, 
-                     IRU[i].dme_data.dme1_dist_comp, dme_dir_1, dump);
-        geod.Inverse(IRU[i].current_pos.lat, IRU[i].current_pos.lon, 
-                     IRU[i].dme_pos[1].lat, IRU[i].dme_pos[1].lon, 
-                     IRU[i].dme_data.dme2_dist_comp, dme_dir_2, dump);
+        IRU[i].dme_data.dme1_dist_comp = gc_distance(GEO3_TO_GEO2(IRU[i].current_pos),GEO3_TO_GEO2(IRU[i].dme_pos[0]));
+        IRU[i].dme_data.dme2_dist_comp = gc_distance(GEO3_TO_GEO2(IRU[i].current_pos),GEO3_TO_GEO2(IRU[i].dme_pos[1]));
+
+
+        // geod.Inverse(IRU[i].current_pos.lat, IRU[i].current_pos.lon, 
+        //              IRU[i].dme_pos[0].lat, IRU[i].dme_pos[0].lon, 
+        //              IRU[i].dme_data.dme1_dist_comp, dme_dir_1, dump);
+
+        // geod.Inverse(IRU[i].current_pos.lat, IRU[i].current_pos.lon, 
+        //              IRU[i].dme_pos[1].lat, IRU[i].dme_pos[1].lon, 
+        //              IRU[i].dme_data.dme2_dist_comp, dme_dir_2, dump);
     }
     
     //compute the E and N position corrections to apply to the current position
