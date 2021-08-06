@@ -96,6 +96,7 @@ void MakeDataRefs()
         DCR_CREATE_I(NULL, &IRU[i].waypoint_selector, true, "omi/iru/%d/nav/waypoint_selector", i);
         DCR_CREATE_I(NULL, &IRU[i].batt_light, true, "omi/iru/%d/battery_light", i);
         DCR_CREATE_I(NULL, &IRU[i].auto_man_switch, true, "omi/iru/%d/nav/auto_man_switch",i);
+        DCR_CREATE_I(NULL, &IRU[i].warn_light, true, "omi/iru/%d/warn_light",i);
 
         DCR_CREATE_F64(NULL, &IRU[i].batt_capacity_sec, true, "omi/iru/%d/battery_secs", i);
         DCR_CREATE_F64(NULL, &IRU[i].drift_angle, true, "omi/iru/%d/drift_angle", i);
@@ -111,7 +112,7 @@ void MakeDataRefs()
         DCR_CREATE_F64(NULL, &IRU[i].flightplan.sel_leg_crs, true, "omi/iru/%d/nav/sel_leg_dsrtk", i);        
         DCR_CREATE_F64(NULL, &IRU[i].track_ang_err, true, "omi/iru/%d/nav/tke", i);
         DCR_CREATE_F64(NULL, &IRU[i].cross_track_err, true, "omi/iru/%d/nav/xte", i);
-        
+        DCR_CREATE_F64(NULL, &IRU[i].flightplan.time_to_fix, true, "omi/iru/%d/time_to_wpt", i);
 
         DCR_CREATE_VI(NULL, (int *) &IRU[i].flightplan.leg, 2, true, "omi/iru/%d/nav/leg_frm_to", i);
 

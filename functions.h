@@ -55,5 +55,5 @@ void waypoint_selector_clamp(int i);
 
 void wpt_deg_min(int i);
 
-double crosstrack_dist(geo_pos3_t wpt1, geo_pos3_t wpt2, geo_pos3_t nav_pos);
+void warn_light_logic(int i);
 #endif

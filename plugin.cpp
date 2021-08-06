@@ -105,6 +105,7 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
                     timer_start = false;
                     old_timer = false;
                 }
+                warn_light_logic(i);
                 adc_data_in(i);                
                 current_pos_update(i);
                 triple_mix_logic(i);

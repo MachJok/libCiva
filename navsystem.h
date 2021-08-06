@@ -11,5 +11,7 @@ void leg_compute(int i, int from, int to);
 
 void leg_switch(int i);
 
+double crosstrack_dist(geo_pos3_t wpt1, geo_pos3_t wpt2, geo_pos3_t nav_pos);
+
 
 #endif

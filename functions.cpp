@@ -329,6 +329,11 @@ void electrical_source()
 
 }
 
+void warn_light_logic(int i)
+{
+    IRU[i].warn_light = IRU[i].flightplan.time_to_fix <= 2 ? 1 : 0;
+}
+
 void debug_set_pos() //shortcut for entering position
 {
     if (first_floop) 
@@ -373,27 +378,6 @@ void wpt_deg_min(int i)
     deg_min(pos.lat, pos.lon, IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm));
 }
 
-double crosstrack_dist(geo_pos3_t wpt1, geo_pos3_t wpt2, geo_pos3_t nav_pos)
-{
-    double delta_13, theta_13, theta_12, crs_13, crs_12;
-    vect3_t p1, p2, pn;
-    geo_pos3_t lat;
-    p1 = geo2ecef_mtr(wpt1, &wgs84);
-    p1 = geo2ecef_mtr(wpt1, &wgs84);
-    pn = geo2ecef_mtr(nav_pos, &wgs84);
-    delta_13 = acos(vect3_dotprod(p1, pn)/(vect3_abs(p1)*vect3_abs(pn)));
-    crs_13 = DEG2RAD(gc_point_hdg(GEO3_TO_GEO2(wpt1), GEO3_TO_GEO2(nav_pos)));
-    crs_12 = DEG2RAD(gc_point_hdg(GEO3_TO_GEO2(wpt1), GEO3_TO_GEO2(wpt2)));
-    lat = {nav_pos.lat,0,0};
-    return asin(sin(delta_13) * sin(crs_13 - crs_12))*vect3_abs(geo2ecef_mtr(lat, &wgs84));
-
-    // double dist_13, dist_12;
-    // geo_pos2_t p1, p2, p0;
-    // p1 = GEO3_TO_GEO2(wpt1);
-    // p2 = GEO3_TO_GEO2(wpt2);
-    // p0 = GEO3_TO_GEO2(nav_pos);
-    // return asin(sin(gc_distance(wpt1, nav_pos)) * sin(gc_point_hdg(wpt1, nav_pos)-gc_point_hdg(p1,p2)));
-}
 //work on the remote transfer function
 void remote_transfer()
 {
