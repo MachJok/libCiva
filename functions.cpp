@@ -30,6 +30,25 @@ double mix_weight{0};
 bool drift = true;
 char output[32] = {0};
 
+
+geo_pos2_t amy_displace(const ellip_t *ellip, geo_pos2_t pos, double truehdg, double dist) {
+    ASSERT(ellip);
+    if(IS_NULL_GEO_POS2(pos)) return NULL_GEO_POS2;
+    
+    static const vect3_t up = VECT3(0, 0, 1);
+    double dist_r = dist / EARTH_MSL;
+    double angle = DEG2RAD(truehdg);
+    
+    vect3_t norm_start = vect3_unit(geo2ecef_mtr(GEO2_TO_GEO3(pos, 0), ellip), NULL);
+    vect3_t east = vect3_unit(vect3_xprod(up, norm_start), NULL);
+    vect3_t north = vect3_unit(vect3_xprod(norm_start, east), NULL);
+    vect3_t dir =  vect3_add(vect3_scmul(north, cos(angle)), vect3_scmul(east, sin(angle)));
+    vect3_t norm_end = vect3_add(vect3_scmul(norm_start, cos(dist_r)), vect3_scmul(dir, sin(dist_r)));
+    
+    geo_pos3_t out = ecef2geo(vect3_set_abs(norm_end, EARTH_MSL), ellip);
+    return GEO3_TO_GEO2(out);
+}
+
 void set_drift_vector()
 {
     if(drift)
@@ -128,13 +147,16 @@ void deg_min(double lat, double lon, char *output, size_t cap)
     double lat_minutes = (abs(lat) - floor(abs(lat)))*60;
     int lon_degrees = abs(lon);
     double lon_minutes = (abs(lon) - floor(abs(lon)))*60;;
-    while (lat_minutes > 59.9)
+    if ((float)(((int)(lat_minutes*10 + 0.5))/10) > 59.9)
     {
-        lat_minutes = clamp(lon_minutes, 0, 59.9);
+        ++lat_degrees;
+        lat_minutes = 0;
     }
-    while (lon_minutes > 59.9)
+
+    if ((float)(((int)(lon_minutes*10 + 0.5))/10) > 59.9)
     {
-        lon_minutes = clamp(lon_minutes, 0, 59.9);
+        ++lon_degrees;
+        lon_minutes = 0;
     }
     char NS = (lat >= 0 ? 'N' : 'S');
     char EW = (lon >= 0 ? 'E' : 'W');
@@ -188,10 +210,9 @@ void current_pos_update(int i)
            //geo_displace(*ellip,  pos, hdg, dist)
     double az = IRU[i].polar_ground_vel.x;
     double dist = IRU[i].polar_ground_vel.y * State_New.frame_time;
-
     geod.Direct(ppos.lat, ppos.lon, az, dist, IRU[i].current_pos.lat, IRU[i].current_pos.lon);
-    // new_pos = geo_displace(&wgs84, ppos, az, dist);
-    // IRU[i].current_pos = {new_pos.lat, new_pos.lon, IRU[i].current_pos.elev};
+    //new_pos = amy_displace(&wgs84, ppos, az, dist);
+    //IRU[i].current_pos = {new_pos.lat, new_pos.lon, IRU[i].current_pos.elev};
 
     deg_min(IRU[i].current_pos.lat, IRU[i].current_pos.lon, IRU[i].curr_pos_dm,
              sizeof(IRU[i].curr_pos_dm));
@@ -331,7 +352,7 @@ void electrical_source()
 
 void warn_light_logic(int i)
 {
-    IRU[i].warn_light = IRU[i].flightplan.time_to_fix <= 2 ? 1 : 0;
+    IRU[i].warn_light = IRU[i].flightplan.time_to_fix <= 120 ? 1 : 0;
 }
 
 void debug_set_pos() //shortcut for entering position
