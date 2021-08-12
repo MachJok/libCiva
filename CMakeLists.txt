@@ -18,16 +18,20 @@ set(SRC
 	structs.cpp
 	dme_functions.cpp
 	navsystem.cpp
+	pos_functions.cpp
+	ecef_functions.cpp
 	)
 set(HDR
     datarefs.h
 	functions.h
-	GeographicLib.h
+	#GeographicLib.h
 	sources.h
 	structs.h
 	variables.h
 	dme_functions.h
-	navsystem.h)
+	navsystem.h
+	pos_functions.h
+	ecef_functions.h)
 # To recall a variable use ${VARNAME}
 set(ALL_SRC ${SRC} ${HDR})
 
@@ -57,7 +61,7 @@ include_directories(CIVA_IRU PUBLIC
     "libacfutils/include"
     "libacfutils/lin64/include"
 #change the following line to the local path for GeographicLib on your system
-    "/usr/local/include/GeographicLib"
+    #"/usr/local/include/GeographicLib"
     )
 
 # You can add language-specific options by manipulating CMAKE_C_FLAGS for
@@ -119,14 +123,14 @@ endif()
 set(LIBACFUTILS "${CMAKE_SOURCE_DIR}/libacfutils")
 #set(GEOGRAPHIC_LIB "${CMAKE_SOURCE_DIR}/geographic_lib")
 find_library(LIBACFUTILS_LIBS acfutils "${LIBACFUTILS}/${ARCH}/lib")
-find_library(GEOGRAPHIC_LIB Geographic "${CMAKE_SOURCE_DIR}/geographic_lib")
+#find_library(GEOGRAPHIC_LIB Geographic "${CMAKE_SOURCE_DIR}/geographic_lib")
 
 #file(GLOB LIBACFUTILS_LIBS ${LIBACFUTILS}/${ARCH}/lib/*.a)
 #file(GLOB GEOGRAPHIC_LIB ${CMAKE_SOURCE_DIR}/geographic_lib/*.a)
 
 target_link_libraries(CIVA_IRU
     ${LIBACFUTILS_LIBS}
-	${GEOGRAPHIC_LIB}      
+	#${GEOGRAPHIC_LIB}      
 )
 
 # This avoids prepending or appending any `lib' or `-<version>' extensions

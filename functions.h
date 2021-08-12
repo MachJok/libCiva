@@ -4,7 +4,7 @@
 #include "structs.h"
 #include "variables.h"
 #include "datarefs.h"
-#include "GeographicLib.h"
+#include "ecef_functions.h"
 #include <acfutils/geom.h>
 #include <acfutils/perf.h>
 #include <cstddef>

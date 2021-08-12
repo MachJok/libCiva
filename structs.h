@@ -62,6 +62,14 @@ struct IRU_t
     char nav_pos_dm[32];
     char waypoint_dm[32];
 
+    vect3_t drift_vect_ecef;
+    vect3_t vel_vect_ecef;
+    vect3_t vel_vect3;
+    vect3_t flight_vect_ecef;
+    vect3_t wind_vect_ecef;
+    vect3_t mix_vect_ecef;
+    vect3_t current_pos_ecef;
+
     vect2_t pos_drift_vect; //unit sensor bias rectangular velocities 
     vect2_t polar_pos_drift;//unit sensor bias polar coordinates
     vect2_t velocity_vect; // current rectangular velocity vector (N, E)

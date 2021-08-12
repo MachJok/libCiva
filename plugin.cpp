@@ -10,6 +10,7 @@
 #include "structs.h"
 #include "variables.h"
 #include "navsystem.h"
+#include "pos_functions.h"
 
 #if IBM
     #include <windows.h>
