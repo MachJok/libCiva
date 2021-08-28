@@ -94,10 +94,11 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
         electrical_source();
         debug_set_pos();
         
+        
         for(int i = 0; i < NUM_IRU; ++i)
         {   
 
-            if(IRU[i].nav_mode > 2 && IRU[i].batt_capacity_sec > 0)
+            if(IRU[i].msu_mode > ALIGN && IRU[i].batt_capacity_sec > 0)
             {
                 timer_start = true;
                 if(timer_start && old_timer == timer_start)
@@ -106,6 +107,7 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
                     timer_start = false;
                     old_timer = false;
                 }
+
                 warn_light_logic(i);
                 adc_data_in(i);                
                 current_pos_update(i);
@@ -115,6 +117,7 @@ static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon
                 leg_switch(i);
             }
             waypoint_selector_clamp(i);
+            remote_priority(i);
         }
 
         if(first_floop)

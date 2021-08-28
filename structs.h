@@ -36,9 +36,41 @@ struct dme_info_t
 
 };
 
+enum cdu_mode_enum
+{
+    TKGS = 0,
+    HDGDA = 1,
+    XTETKE = 2,
+    POS = 3,
+    WPT = 4,
+    DISTIME = 5,
+    WIND = 6,
+    DSRTKSTS = 7
+};
+
+enum msu_mode_enum
+{
+    OFF = 0,
+    STBY = 1,
+    ALIGN = 2,
+    NAV = 3,
+    ATT = 4
+};
+
+enum bus_msg_enum
+{
+    MESSAGE_REMOTE,
+    MESSAGE_UPDATE_VECT,
+    MESSAGE_DME_DATA
+};
+
+struct data_bus_t
+{
+    void* data;
+};
+
 struct IRU_t
 {
-    int nav_mode; //nav mode on
     int power_on; //is the unit on
     int mix_switch; //triple mix
     int batt_light; //battery light
@@ -46,7 +78,11 @@ struct IRU_t
     int auto_man_switch;
     bool leg_switch;
     int warn_light;
-
+    int remote_on;
+    int remote_sender;
+    int remote_receiver;
+    cdu_mode_enum current_mode;
+    msu_mode_enum msu_mode;
     flightplan_t flightplan;
 
     dme_info_t dme_data;
@@ -126,5 +162,8 @@ struct Sim_State_t
 extern IRU_t IRU[NUM_IRU];
 extern Sim_State_t State_New;
 extern Sim_State_t State_Old;
+extern data_bus_t data_bus;
+
+//work on databus function for communication between units additionally the detection of changed waypoints for transmitting
 
 #endif

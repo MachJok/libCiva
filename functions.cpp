@@ -19,6 +19,7 @@
 #include <random>
 #include <sys/types.h>
 #include <type_traits>
+#include <array>
 
 
 geo_pos3_t old_pos{0}, mix_pos{0};
@@ -29,6 +30,11 @@ bool triple_mix_on{false};
 double mix_weight{0};
 bool drift = true;
 char output[32] = {0};
+
+std::array<double, 9> waypoint_lat_old;
+std::array<double, 9> waypoint_lon_old;
+std::array<double, 9> waypoint_lat;
+std::array<double, 9> waypoint_lon;   
 
 void set_true_hdg_offset()
 {
@@ -72,14 +78,14 @@ void true_heading_update(int i)
 
 void triple_mix_logic(int i)
 {
-    if(!IRU[i].mix_switch || IRU[i].nav_mode != 3 || NUM_IRU < 3)
+    if(!IRU[i].mix_switch || IRU[i].msu_mode != NAV || NUM_IRU < 3)
     {
         IRU[i].mix_pos = {0};
         IRU[i].mix_vect = {0};
         IRU[i].polar_mix_vel = {0};
     }
     
-    if(NUM_IRU > 2 && (IRU[i].mix_switch && IRU[i].nav_mode == 3))
+    if(NUM_IRU > 2 && (IRU[i].mix_switch && IRU[i].msu_mode == NAV))
     {    
         triple_mix();
         nav_pos_ecef = geo2ecef_mtr(IRU[i].nav_pos, &wgs84);
@@ -96,7 +102,7 @@ void triple_mix_logic(int i)
         IRU[i].nav_pos = ecef2geo(new_nav_pos, &wgs84);
         deg_min(IRU[i].nav_pos.lat, IRU[i].nav_pos.lon, IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm));
     }
-    else if(NUM_IRU < 3 || (!IRU[i].mix_switch || IRU[i].nav_mode != 3))
+    else if(NUM_IRU < 3 || (!IRU[i].mix_switch || IRU[i].msu_mode != NAV))
     {
         triple_mix_on = false;
         IRU[i].nav_pos = IRU[i].current_pos;
@@ -112,7 +118,7 @@ void electrical_source()
     int num_gens = std::count(State_New.eng_gen_on, State_New.eng_gen_on + n, 1);
     for(int i = 0; i < NUM_IRU; ++i)
     {
-        if(!State_New.apu_gen_on && num_gens < 1 && IRU[i].nav_mode > 0)
+        if(!State_New.apu_gen_on && num_gens < 1 && IRU[i].msu_mode > OFF)
         {
             FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, State_New.frame_time, 1);
             IRU[i].power_on = 0;//CHANGE THIS TO BE CONTROLED BY BATT AND GENERATOR POWER
@@ -143,7 +149,7 @@ void debug_set_pos() //shortcut for entering position
             IRU[i].current_pos.lat = State_New.lat;
             IRU[i].current_pos.lon = State_New.lon;
             IRU[i].current_pos.elev = State_New.elev_mtr;
-            IRU[i].nav_mode = 3;
+            IRU[i].msu_mode = NAV;
             IRU[i].mix_switch = 0;
         }    
     }
@@ -179,13 +185,13 @@ void deg_min(double lat, double lon, char *output, size_t cap)
     double lat_minutes = (abs(lat) - floor(abs(lat)))*60;
     int lon_degrees = abs(lon);
     double lon_minutes = (abs(lon) - floor(abs(lon)))*60;
-    if ((float)(((int)(lat_minutes*100 + 0.5))/100) > 59.95)
+    if ((float)(((int)(lat_minutes*100 + 0.5))/100) > 59.94)
     {
         ++lat_degrees;
         lat_minutes = 0;
     }
 
-    if ((float)(((int)(lon_minutes*100 + 0.5))/100) > 59.95)
+    if ((float)(((int)(lon_minutes*100 + 0.5))/100) > 59.94)
     {
         ++lon_degrees;
         lon_minutes = 0;
@@ -204,19 +210,136 @@ void adc_data_in(int i)
     IRU[i].polar_flight_vel = {hdg, tas};
     IRU[i].flight_vect_ecef = compute_ecef_vel(IRU[i].nav_pos, IRU[i].vel_vect_ecef);
 
-    if(i == 2 && IRU[i].nav_mode == 3)
+    if(i == 2 && IRU[i].msu_mode == NAV)
     {
         IRU[i].adc1_alt = FEET2MET(State_New.alt_ft_[0]);
         IRU[i].tas = KT2MPS(State_New.tas_kt_[0]);
     }
-    else if(IRU[i].nav_mode == 3)
+    else if(IRU[i].msu_mode == NAV)
     {
         IRU[i].adc2_alt = FEET2MET(State_New.alt_ft_[i]);
         IRU[i].tas = KT2MPS(State_New.tas_kt_[i]);
     }
     //integrate each frame vertical speed to compute altitude
-    
   
 }
 
-//work on the remote transfer function and adc validity check
+void waypoint_transfer(int i)
+{
+    
+    if(IRU[i].remote_sender)
+    {
+        for (int j = 1; j < 10; ++j) 
+        {
+            waypoint_lat_old[j-1] = State_Old.IRU[i].flightplan.waypoint_pos[j].lat;
+            waypoint_lon_old[j-1] = State_Old.IRU[i].flightplan.waypoint_pos[j].lon;
+            waypoint_lat[j-1] = IRU[i].flightplan.waypoint_pos[j].lat;
+            waypoint_lon[j-1] = IRU[i].flightplan.waypoint_pos[j].lon;
+        }
+    }
+
+    #if NUM_IRU == 1
+        continue;
+    #elif NUM_IRU == 2
+        if(IRU[0].remote_sender && IRU[0].)
+        {
+            int wpt_num = IRU[0].waypoint_selector;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lat = IRU[0].flightplan.waypoint_pos[wpt_num].lat;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lon = IRU[0].flightplan.waypoint_pos[wpt_num].lon;
+        }
+        if(IRU[1].remote_sender)
+        {
+            int wpt_num = IRU[1].waypoint_selector;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lat = IRU[1].flightplan.waypoint_pos[wpt_num].lat;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lon = IRU[1].flightplan.waypoint_pos[wpt_num].lon;
+        }
+    #elif NUM_IRU == 3
+        if(IRU[0].remote_sender)
+        {
+            int wpt_num = IRU[0].waypoint_selector;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lat = IRU[0].flightplan.waypoint_pos[wpt_num].lat;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lon = IRU[0].flightplan.waypoint_pos[wpt_num].lon;
+        }
+        if(IRU[1].remote_sender)
+        {
+            int wpt_num = IRU[1].waypoint_selector;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lat = IRU[1].flightplan.waypoint_pos[wpt_num].lat;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lon = IRU[1].flightplan.waypoint_pos[wpt_num].lon;
+        }
+        if(IRU[2].remote_sender)
+        {
+            int wpt_num = IRU[2].waypoint_selector;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lat = IRU[2].flightplan.waypoint_pos[wpt_num].lat;
+            IRU[i].flightplan.waypoint_pos[wpt_num].lon = IRU[2].flightplan.waypoint_pos[wpt_num].lon;
+        }
+    #endif                      
+}
+
+void remote_priority(int i)
+{
+    #if NUM_IRU == 1
+        continue;
+
+    #elif NUM_IRU == 2
+        std::array <int, 2> iru_remote_old {State_Old.IRU[0].remote_on, State_Old.IRU[1].remote_on};
+        std::array <int, 2> iru_remote {IRU[0].remote_on, IRU[1].remote_on};
+        if (iru_remote != iru_remote_old)
+        {
+
+            if (IRU[0].remote_on && !IRU[1].remote_on)
+            {
+                IRU[0].remote_sender = 1;
+                IRU[0].remote_receiver = 0;
+                IRU[1].remote_sender = 0;
+                IRU[1].remote_receiver = 1;
+            }
+            if (!IRU[0].remote_on && IRU[1].remote_on)
+            {
+                IRU[0].remote_sender = 0;
+                IRU[0].remote_receiver = 1;
+                IRU[1].remote_sender = 1;
+                IRU[1].remote_receiver = 0;
+            }
+        }
+        
+    #elif NUM_IRU == 3
+
+        if (IRU[0].remote_on && !IRU[1].remote_on && !IRU[2].remote_on)
+        {
+            IRU[0].remote_sender = 1;
+            IRU[0].remote_receiver = 0;
+
+            IRU[1].remote_sender = 0;
+            IRU[1].remote_receiver = 1;
+
+            IRU[1].remote_sender = 0;
+            IRU[1].remote_receiver = 1;            
+        }
+        if (!IRU[0].remote_on && IRU[1].remote_on && !IRU[2].remote_on)
+        {
+            IRU[0].remote_sender = 0;
+            IRU[0].remote_receiver = 1;
+
+            IRU[1].remote_sender = 1;
+            IRU[1].remote_receiver = 0;
+            
+            IRU[1].remote_sender = 0;
+            IRU[1].remote_receiver = 1;            
+        }
+        if (!IRU[0].remote_on && !IRU[1].remote_on && IRU[2].remote_on)
+        {
+            IRU[0].remote_sender = 0;
+            IRU[0].remote_receiver = 1;
+
+            IRU[1].remote_sender = 0;
+            IRU[1].remote_receiver = 1;
+            
+            IRU[1].remote_sender = 1;
+            IRU[1].remote_receiver = 0;            
+        }                  
+    #endif
+    waypoint_transfer(i);
+
+}
+
+

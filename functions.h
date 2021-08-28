@@ -56,4 +56,6 @@ void waypoint_selector_clamp(int i);
 void wpt_deg_min(int i);
 
 void warn_light_logic(int i);
+void remote_priority(int i);
+void waypoint_transfer(int i);
 #endif

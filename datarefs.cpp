@@ -91,7 +91,10 @@ void MakeDataRefs()
             DCR_CREATE_VF64(NULL, (double *) &IRU[i].dme_pos[j], 3, true, "omi/iru/%d/dme-%d_pos", i, j);
         } 
         
-        DCR_CREATE_I(NULL, &IRU[i].nav_mode, true, "omi/iru/%d/mode", i);
+        DCR_CREATE_I(NULL, (int *)&IRU[i].msu_mode, true, "omi/iru/%d/mode", i);
+        DCR_CREATE_I(NULL, &IRU[i].remote_on, true, "omi/iru/%d/remote_on", i);
+        DCR_CREATE_I(NULL, &IRU[i].remote_sender, true, "omi/iru/%d/remote_sender", i);
+        DCR_CREATE_I(NULL, &IRU[i].remote_receiver, true, "omi/iru/%d/remote_recvr", i);     
         DCR_CREATE_I(NULL, &IRU[i].power_on, true, "omi/iru/%d/power", i);
         DCR_CREATE_I(NULL, &IRU[i].mix_switch, true, "omi/iru/%d/triple_mix_switch", i);
         DCR_CREATE_I(NULL, &IRU[i].waypoint_selector, true, "omi/iru/%d/nav/waypoint_selector", i);
@@ -143,7 +146,6 @@ void MakeDataRefs()
         }
         DCR_CREATE_B(NULL, &IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm), true, "omi/iru/%d/nav/waypoint_dm", i);
         DCR_CREATE_B(NULL, &IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
-
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_pos, 2, true, "omi/iru/%d/triple_pos",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_vect, 2, true, "omi/iru/%d/triple_vel_en",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_mix_vel, 2,  true, "omi/iru/%d/triple_vel_vect", i);
