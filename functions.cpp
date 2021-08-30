@@ -184,15 +184,15 @@ void deg_min(double lat, double lon, char *output, size_t cap)
     double int_dump;
     double lat_val = abs(round(lat*600)/600);
     double lon_val = abs(round(lon*600)/600);
-    double lat_deg = floor(lat_val);
-    double lon_deg = floor(lon_val);
-    double lat_min = (modf(lat_val, &int_dump) * 600) > 599.4 ? 0 : trunc((modf(lat_val, &int_dump) * 600));
-    double lon_min = (modf(lon_val, &int_dump) * 600) > 599.4 ? 0 : trunc((modf(lon_val, &int_dump) * 600));
+    u_int8_t lat_deg = floor(lat_val);
+    u_int8_t lon_deg = floor(lon_val);
+    u_short lat_min = (modf(lat_val, &int_dump) * 600) > 599.4 ? 0 : trunc((modf(lat_val, &int_dump) * 600));
+    u_short lon_min = (modf(lon_val, &int_dump) * 600) > 599.4 ? 0 : trunc((modf(lon_val, &int_dump) * 600));
     
     char NS = (lat >= 0 ? 'N' : 'S');
     char EW = (lon >= 0 ? 'E' : 'W');
-    snprintf(output, cap, "%c%02i%03.0f%c%03i%03.0f", 
-            NS, (int)lat_deg,  lat_min, EW, (int)lon_deg, lon_min);  
+    snprintf(output, cap, "%c%02u%03u%c%03u%03u", 
+            NS, lat_deg,  lat_min, EW, lon_deg, lon_min);  
 }
 
 void adc_data_in(int i)
