@@ -93,10 +93,10 @@ struct IRU_t
     geo_pos3_t mix_pos;
     geo_pos3_t nav_pos;
     
-    char curr_pos_dm[32];
-    char mix_pos_dm[32];
-    char nav_pos_dm[32];
-    char waypoint_dm[32];
+    char curr_pos_dm[14];
+    char mix_pos_dm[14];
+    char nav_pos_dm[14];
+    char waypoint_dm[14];
 
     vect3_t drift_vect_ecef;
     vect3_t vel_vect_ecef;
