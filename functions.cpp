@@ -181,31 +181,18 @@ void wpt_deg_min(int i)
 
 void deg_min(double lat, double lon, char *output, size_t cap)
 {
-    int lat_degrees = abs(lat);
-    double lat_minutes = (abs(lat) - floor(abs(lat)))*60;
-    double lat_dec_min = (lat_minutes - floor(lat_minutes))*10;
-    int lon_degrees = abs(lon);
-    double lon_minutes = (abs(lon) - floor(abs(lon)))*60;
-    double lon_dec_min = (lat_minutes - floor(lat_minutes))*10;
-
-
-    if ((float)(((int)(lat_minutes*100 + 0.5))/100) > 59.94)
-    {
-        ++lat_degrees;
-        lat_minutes = 0;
-    }
-
-    if ((float)(((int)(lon_minutes*100 + 0.5))/100) > 59.94)
-    {
-        ++lon_degrees;
-        lon_minutes = 0;
-    }
-
-
+    double int_dump;
+    double lat_val = abs(round(lat*600)/600);
+    double lon_val = abs(round(lon*600)/600);
+    double lat_deg = floor(lat_val);
+    double lon_deg = floor(lon_val);
+    double lat_min = (modf(lat_val, &int_dump) * 600) > 599.4 ? 0 : trunc((modf(lat_val, &int_dump) * 600));
+    double lon_min = (modf(lon_val, &int_dump) * 600) > 599.4 ? 0 : trunc((modf(lon_val, &int_dump) * 600));
+    
     char NS = (lat >= 0 ? 'N' : 'S');
     char EW = (lon >= 0 ? 'E' : 'W');
     snprintf(output, cap, "%c%02i%03.0f%c%03i%03.0f", 
-            NS, lat_degrees,  lat_minutes*10, EW, lon_degrees, lon_minutes*10);  
+            NS, (int)lat_deg,  lat_min, EW, (int)lon_deg, lon_min);  
 }
 
 void adc_data_in(int i)
