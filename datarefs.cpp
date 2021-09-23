@@ -17,8 +17,7 @@ void LoadDataRefs()
     fdr_find(&Sim_Hdg_True, "sim/flightmodel/position/true_psi");
     fdr_find(&Sim_APU_gen_on, "sim/cockpit/electrical/generator_apu_on");
     fdr_find(&Sim_ENG_gen_on, "sim/cockpit/electrical/generator_on");
-    fdr_find(&Sim_Timestamp, "sim/time/total_running_time_sec");
-    fdr_find(&Sim_Paused, "sim/time/paused");
+
     fdr_find(&Sim_TAS_L,"sim/cockpit2/gauges/indicators/true_airspeed_kts_pilot");
     fdr_find(&Sim_TAS_R,"sim/cockpit2/gauges/indicators/true_airspeed_kts_copilot");
     fdr_find(&Sim_ALT_L,"sim/cockpit2/gauges/indicators/altitude_ft_pilot");
@@ -146,6 +145,8 @@ void MakeDataRefs()
         }
         DCR_CREATE_B(NULL, &IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm), true, "omi/iru/%d/nav/waypoint_dm", i);
         DCR_CREATE_B(NULL, &IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
+        DCR_CREATE_B(NULL, &IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm), true, "omi/iru/%d/nav_pos_dm", i);
+
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_pos, 2, true, "omi/iru/%d/triple_pos",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_vect, 2, true, "omi/iru/%d/triple_vel_en",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_mix_vel, 2,  true, "omi/iru/%d/triple_vel_vect", i);
