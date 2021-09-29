@@ -107,6 +107,7 @@ void triple_mix_logic(int i)
         triple_mix_on = false;
         IRU[i].nav_pos = IRU[i].current_pos;
         deg_min(IRU[i].nav_pos.lat, IRU[i].nav_pos.lon, IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm));
+		FILTER_IN(mix_weight, 0, State_New.frame_time, 30);
     }    
 }
 
@@ -116,18 +117,19 @@ void electrical_source()
 {
     int n = sizeof(State_New.eng_gen_on) / sizeof(State_New.eng_gen_on[0]);
     int num_gens = std::count(State_New.eng_gen_on, State_New.eng_gen_on + n, 1);
+	int apu_gen_on = State_New.apu_gen_on;
     for(int i = 0; i < NUM_IRU; ++i)
     {
-        if(!State_New.apu_gen_on && num_gens < 1 && IRU[i].msu_mode > OFF)
+        if(!apu_gen_on && !num_gens && IRU[i].msu_mode != OFF)
         {
             FILTER_IN_LIN(IRU[i].batt_capacity_sec, 0, State_New.frame_time, 1);
             IRU[i].power_on = 0;//CHANGE THIS TO BE CONTROLED BY BATT AND GENERATOR POWER
             IRU[i].batt_light = !IRU[i].power_on;
         }
 
-        if(IRU[i].batt_capacity_sec < 900 && num_gens >= 1)
+        if(IRU[i].batt_capacity_sec < 900 && (num_gens >= 1 || apu_gen_on))
         {   
-            FILTER_IN_LIN(IRU[i].batt_capacity_sec, 900, State_New.frame_time, 1);
+            FILTER_IN_LIN(IRU[i].batt_capacity_sec, 900, State_New.frame_time, 0.1);
             IRU[i].power_on = 1;
             IRU[i].batt_light = !IRU[i].power_on;           
         }

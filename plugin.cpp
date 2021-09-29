@@ -4,6 +4,7 @@
 #include <acfutils/log.h>
 #include <acfutils/core.h>
 #include <cstring>
+#include "XPLMDefs.h"
 #include "sources.h"
 #include "datarefs.h"
 #include "functions.h"
@@ -80,6 +81,7 @@ PLUGIN_API void XPluginStop()
 }
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void * inParam) { }
+
 
 static float iru_floop(float elapsed1, float elapsed2, int counter, void* refcon)
 {
