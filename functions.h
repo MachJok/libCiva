@@ -58,4 +58,7 @@ void wpt_deg_min(int i);
 void warn_light_logic(int i);
 void remote_priority(int i);
 void waypoint_transfer(int i);
+
+void timer_functions(IRU_t *iru, double delta_time);
+
 #endif

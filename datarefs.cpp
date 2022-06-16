@@ -53,7 +53,6 @@ void GetDataRefs()
     State_New.lon = dr_getf_prot(&Sim_Lon);
     State_New.apu_gen_on = dr_geti(&Sim_APU_gen_on);
     dr_getvi(&Sim_ENG_gen_on, State_New.eng_gen_on, 0, 8);
-    State_New.paused = dr_geti(&Sim_Paused);
     State_New.tas_ms = dr_getf_prot(&Sim_TAS);
     State_New.hdg_true = dr_getf_prot(&Sim_Hdg_True);
     State_New.tas_kt_[0] = dr_getf_prot(&Sim_TAS_L);
@@ -80,7 +79,8 @@ void MakeDataRefs()
     DCR_CREATE_B(NULL, &sim_pos_dm, sizeof(sim_pos_dm), true, "omi/iru/sim_pos_dm");
     DCR_CREATE_VF64(NULL, (double *) &mix_pos, 3, true, "omi/iru/triple_pos");
     DCR_CREATE_VF64(NULL, (double *) &mix_pos_ecef, 3, true, "omi/iru/triple_pos_ecef");
-    
+	int num_irus = NUM_IRU;
+    DCR_CREATE_I(NULL, &num_irus, true, "omi/iru/num_irus");
 
     for (int i = 0; i < NUM_IRU; i++)
     {
@@ -89,8 +89,8 @@ void MakeDataRefs()
         {
             DCR_CREATE_VF64(NULL, (double *) &IRU[i].dme_pos[j], 3, true, "omi/iru/%d/dme-%d_pos", i, j);
         } 
-        
-        DCR_CREATE_I(NULL, (int *)&IRU[i].msu_mode, true, "omi/iru/%d/mode", i);
+        DCR_CREATE_I(NULL, (int*) &IRU[i].leg_switch, true, "omi/iru/%d/nav/leg_switch", i);
+        DCR_CREATE_I(NULL, (int*) &IRU[i].msu_mode, true, "omi/iru/%d/mode", i);
         DCR_CREATE_I(NULL, &IRU[i].remote_on, true, "omi/iru/%d/remote_on", i);
         DCR_CREATE_I(NULL, &IRU[i].remote_sender, true, "omi/iru/%d/remote_sender", i);
         DCR_CREATE_I(NULL, &IRU[i].remote_receiver, true, "omi/iru/%d/remote_recvr", i);     
@@ -100,6 +100,8 @@ void MakeDataRefs()
         DCR_CREATE_I(NULL, &IRU[i].batt_light, true, "omi/iru/%d/battery_light", i);
         DCR_CREATE_I(NULL, &IRU[i].auto_man_switch, true, "omi/iru/%d/nav/auto_man_switch",i);
         DCR_CREATE_I(NULL, &IRU[i].warn_light, true, "omi/iru/%d/warn_light",i);
+		DCR_CREATE_I(NULL, &IRU[i].alert_light, true, "omi/iru/%d/alert_light",i);
+		DCR_CREATE_I(NULL, (int *) &IRU[i].hold_on, true, "omi/iru/%d/hold_on", i);
 
         DCR_CREATE_F64(NULL, &IRU[i].batt_capacity_sec, true, "omi/iru/%d/battery_secs", i);
         DCR_CREATE_F64(NULL, &IRU[i].drift_angle, true, "omi/iru/%d/drift_angle", i);
@@ -115,11 +117,11 @@ void MakeDataRefs()
         DCR_CREATE_F64(NULL, &IRU[i].track_ang_err, true, "omi/iru/%d/nav/tke", i);
         DCR_CREATE_F64(NULL, &IRU[i].cross_track_err, true, "omi/iru/%d/nav/xte", i);
         DCR_CREATE_F64(NULL, &IRU[i].flightplan.time_to_fix, true, "omi/iru/%d/time_to_wpt", i);
+		DCR_CREATE_F64(NULL, &IRU[i].time_since_update, true, "omi/iru/%d/time_since_update", i);
 
         
 
         DCR_CREATE_VI(NULL, (int *) &IRU[i].flightplan.leg, 2, true, "omi/iru/%d/nav/leg_frm_to", i);
-
 
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].current_pos_ecef, 3, true, "omi/iru/%d/iru_pos_ecef", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].drift_vect_ecef, 3, true, "omi/iru/%d/drift_vect_ecef", i);
@@ -127,22 +129,28 @@ void MakeDataRefs()
       //DCR_CREATE_VF64(NULL, (double *) &IRU[i].mix_vect_ecef, 3, true, "omi/iru/%d/mix_pos_ecef", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].vel_vect_ecef, 3, true, "omi/iru/%d/ground_vect_ecef", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].wind_vect_ecef, 3, true, "omi/iru/%d/wind_vect_ecef", i);
-        DCR_CREATE_VF64(NULL, (double *) &IRU[i].current_pos, 3, true, "omi/iru/%d/iru_pos", i);
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].wind_vect_hx, 2, true, "omi/iru/%d/wind_hx", i);
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].current_pos, 3, true, "omi/iru/%d/iru_pos", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].nav_pos, 3, true, "omi/iru/%d/nav_pos", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].align_pos, 3, true, "omi/iru/%d/align_pos", i);
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].vel_corr_vect3, 3, true, "omi/iru/%d/vel_corr_vect3",i);
+
 
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].pos_drift_vect, 2, true, "omi/iru/%d/pos_drift_en",i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_pos_drift, 2, true, "omi/iru/%d/pos_drift_vect",i);
-        DCR_CREATE_VF64(NULL, (double *) &IRU[i].velocity_vect, 2, true, "omi/iru/%d/gnd_vel_en", i);
-        DCR_CREATE_VF64(NULL, (double *) &IRU[i].flight_vect, 2, true, "omi/iru/%d/flt_vel_en", i);        
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].velocity_vect, 2, true, "omi/iru/%d/gnd_vect_en", i);
+        DCR_CREATE_VF64(NULL, (double *) &IRU[i].flight_vect, 2, true, "omi/iru/%d/flt_vect_en", i);        
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_ground_vel, 2, true, "omi/iru/%d/ground_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_flight_vel, 2, true, "omi/iru/%d/flight_vel_vect", i);
         DCR_CREATE_VF64(NULL, (double *) &IRU[i].polar_wind_vect, 2, true, "omi/iru/%d/wind_vect",i);
-        for(int j = 1; j < 10; ++j)
-        {
-            DCR_CREATE_VF64(NULL, (double *) &IRU[i].flightplan.waypoint_pos[j], 2, true, "omi/iru/%d/nav/waypoint%d", i, j);
-            
-        }
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].wind_vect_en, 2, true, "omi/iru/%d/wind_en",i);
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].vel_corr_vect2, 2, true, "omi/iru/%d/vel_corr_vect2",i);
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].update_pos2, 2, true, "omi/iru/%d/update_position_in", i);
+	for(int j = 0; j < 10; ++j)
+	{
+		DCR_CREATE_VF64(NULL, (double *) &IRU[i].flightplan.waypoint_pos[j], 2, true, "omi/iru/%d/nav/waypoint%d", i, j);
+		
+	}
         DCR_CREATE_B(NULL, &IRU[i].waypoint_dm, sizeof(IRU[i].waypoint_dm), true, "omi/iru/%d/nav/waypoint_dm", i);
         DCR_CREATE_B(NULL, &IRU[i].curr_pos_dm, sizeof(IRU[i].curr_pos_dm), true, "omi/iru/%d/current_pos_dm", i);
         DCR_CREATE_B(NULL, &IRU[i].nav_pos_dm, sizeof(IRU[i].nav_pos_dm), true, "omi/iru/%d/nav_pos_dm", i);

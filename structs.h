@@ -36,7 +36,7 @@ struct dme_info_t
 
 };
 
-enum cdu_mode_enum
+enum cdu_mode_enum_t
 {
     TKGS = 0,
     HDGDA = 1,
@@ -48,7 +48,7 @@ enum cdu_mode_enum
     DSRTKSTS = 7
 };
 
-enum msu_mode_enum
+enum msu_mode_enum_t
 {
     OFF = 0,
     STBY = 1,
@@ -64,29 +64,31 @@ enum bus_msg_enum
     MESSAGE_DME_DATA
 };
 
-struct data_bus_t
-{
-    void* data;
-};
-
 struct IRU_t
 {
+	bool leg_switch;
+	bool alert_flash;
+	bool hold_on;
+
     int power_on; //is the unit on
     int mix_switch; //triple mix
     int batt_light; //battery light
     int waypoint_selector;
     int auto_man_switch;
-    bool leg_switch;
+    
     int warn_light;
+	int alert_light;
     int remote_on;
     int remote_sender;
     int remote_receiver;
-    cdu_mode_enum current_mode;
-    msu_mode_enum msu_mode;
+    cdu_mode_enum_t current_mode;
+    msu_mode_enum_t msu_mode;
     flightplan_t flightplan;
 
     dme_info_t dme_data;
-    geo_pos2_t update_pos;
+    geo_pos2_t update_pos2;
+	geo_pos3_t update_pos3;
+	geo_pos2_t hold_pos2;
     geo_pos3_t current_pos; //computed from align pos and fwd propogation
     geo_pos3_t align_pos; //input for alignment - no cheating, bad pos = bad nav
     geo_pos3_t dme_pos[9]; //0 = dme 1
@@ -105,6 +107,7 @@ struct IRU_t
     vect3_t wind_vect_ecef;
     vect3_t mix_vect_ecef;
     vect3_t current_pos_ecef;
+	vect3_t vel_corr_vect3;
 
     vect2_t pos_drift_vect; //unit sensor bias rectangular velocities 
     vect2_t polar_pos_drift;//unit sensor bias polar coordinates
@@ -115,11 +118,12 @@ struct IRU_t
     vect2_t polar_wind_vect;
     vect2_t mix_vect;
     vect2_t polar_mix_vel;
-    vect2_t wind_vect;
+    vect2_t wind_vect_en;
+	vect2_t wind_vect_hx;
     vect2_t pos_corr_dme[2];
+	vect2_t vel_corr_vect2;
 
-    double adc1_alt;
-    double adc2_alt;
+    double adc_alt;
     double heading_true; //true heading degrees
     double batt_capacity_sec; //1800 seconds of power
     double drift_angle;
@@ -127,7 +131,7 @@ struct IRU_t
     double track_ang_err;
     double tas;
     double time_in_nav;
-
+	double time_since_update;
     };
 
 struct Sim_State_t
@@ -139,6 +143,7 @@ struct Sim_State_t
     int static2_fail;
     int num_generators;
     double runtime;
+	double delta_time;
     double tas_kt_[2];
     double alt_ft_[2];
     double tas_ms;
@@ -162,7 +167,6 @@ struct Sim_State_t
 extern IRU_t IRU[NUM_IRU];
 extern Sim_State_t State_New;
 extern Sim_State_t State_Old;
-extern data_bus_t data_bus;
 
 //work on databus function for communication between units additionally the detection of changed waypoints for transmitting
 

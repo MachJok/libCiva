@@ -7,9 +7,6 @@
 extern geo_pos3_t old_pos, mix_pos; //pos_3 will be the triple mix position
 extern vect3_t mix_pos_ecef;
 extern bool first_floop, drift, adc1_valid, adc2_valid;;
-extern double nav_start_time;
-
-
 extern char sim_pos_dm[32];
 
 
