@@ -124,7 +124,7 @@ void leg_switch(int i)
 		(earth_gravity_accurate(IRU[i].current_pos.lat, IRU[i].current_pos.elev) 
 			* tan(bank_limit_rad));
 	double bank_rate_correction_distance = (bank_limit_rad / bank_rate_rad) * 
-											((gs1 + gs2)/2.0);
+											gs1;
 	distance = radius * tan(DEG2RAD(delta_hdg)/2) + bank_rate_correction_distance;
 
 	bool in_switch_dist = (IRU[i].flightplan.curr_leg_dist <= distance + 50. &&
